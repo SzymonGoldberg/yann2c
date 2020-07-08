@@ -1,0 +1,222 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <time.h>
+#include "matrix.h"
+#include "deep_network.h"
+
+int main (void)
+{
+//===== random seed =====
+
+ 	srand(time(NULL));
+
+//===== TESTY DOT. ALOKACJI =====
+	printf("TEST 1 (alokacja)\n");
+	matrix_t *a = matrix_alloc(3, 2);
+	if(a != NULL) { printf("=== OK ===\n"); }
+	else
+	{
+		printf("Funkcja powinna zwrocic wskaznik na zaalokowana pamiec a zwrocila NULL\n");
+		return 1;
+	}
+
+	printf("TEST 2 (alokacja)\n");
+	matrix_t *b = matrix_alloc(2, 3);
+	if(b != NULL) { printf("=== OK ===\n"); }
+	else
+	{
+		printf("Funkcja powinna zwrocic wskaznik na zaalokowana pamiec a zwrocila NULL\n");
+		return 1;
+	}
+
+	printf("TEST 3 (alokacja)\n");
+	matrix_t *c = matrix_alloc(2, 2);
+	if(c != NULL) { printf("=== OK ===\n"); }
+	else
+	{
+		printf("Funkcja powinna zwrocic wskaznik na zaalokowana pamiec a zwrocila NULL\n");
+		return 1;
+	}
+
+
+//===== TEST DOT. ZAPELNIANIA MACIERZY =====
+
+	printf("TEST 4 (zapelnianie)\n");
+	double tab[6] = {1.0, 0.0, 2.0,
+			-1.0, 3.0, 1.0};
+
+        matrix_fill(a, 6,	tab[0], tab[1], tab[2],
+				tab[3], tab[4], tab[5]);
+
+	int err = 0;
+
+	for(int i = 0; i < 6; ++i)
+		if( (*a).matrix[i] != tab[i]) ++err;
+
+	if(err)
+	{
+		printf("Funkcja zapelnila nieprawidlowo %i komorek macierzy\n", err);
+		return 1;
+	}
+	printf("=== OK! ===\n");
+	
+	printf("TEST 5 (zapelnianie)\n");
+	double tab2[6] =       {3.0, 1.0,
+				2.0, 1.0,
+				1.0, 0.0};
+
+        matrix_fill(b, 6,	tab2[0], tab2[1],
+				tab2[2], tab2[3],
+				tab2[4], tab2[5]);
+
+	err = 0;
+	for(int i = 0; i < 6; ++i)
+		if( (*b).matrix[i] != tab2[i]) ++err;
+
+	if(err)
+	{
+		printf("Funkcja zapelnila nieprawidlowo %i komorek macierzy\n", err);
+		return 1;
+	}
+	printf("=== OK! ===\n");
+	
+
+
+//===== TESTY DOT. MNOZENIA =====
+
+	printf("TEST 6 (mnozenie)\n");
+
+	int aux = matrix_multiply(*a, *b, c, 0);
+
+        if(aux) printf("--- funkcja powinna zwrocic 0 a zwrocila %i ---\n", aux); 
+	
+	if((*c).matrix[0] != 5 || (*c).matrix[1] != 1 || (*c).matrix[2] != 4 ||
+		(*c).matrix[3] != 2)
+	{
+        	printf("--- blad w mnozeniu - macierz c powinna miec nastepujace wartosci:");
+		printf("5 1\n4 2\na ma:\n");
+		matrix_display(*c);
+		return 1;
+	}
+	printf("=== OK! ===\n");
+
+	printf("TEST 7 (mnozenie macierzy transponowanej)\n");
+
+	aux = matrix_multiply(*c, *b, a, 1);
+
+        if(aux) printf("--- funkcja powinna zwrocic 0 a zwrocila %i ---\n", aux); 
+	
+	if((int)(*a).matrix[0] != 16 || (int)(*a).matrix[1] != 11 ||
+	(int)(*a).matrix[2] != 5 || (int)(*a).matrix[3] != 14 ||
+	(int)(*a).matrix[4] != 10 || (int)(*a).matrix[5] != 4)
+	{
+        	printf("--- blad w mnozeniu - macierz c powinna miec nastepujace wartosci:");
+		printf("\n16 11 5\n14 10 4\na ma:\n");
+		matrix_display(*a);
+		return 1;
+	}
+	printf("=== OK! ===\n");
+
+//===== TESTY DOT. OBLICZANIA ODP SIECI =====
+
+	printf("TEST 8 (siec neuronowa - 1 warstwa, 4 serie)\n");
+
+	matrix_t* output = neural_network(*c, *b);
+	if(output == NULL)
+	{
+		printf("Funkcja powinna zwrocic wskaznik na strukture a zwrocila NULL\n");
+		return 1;
+	}
+
+	if((int)(*output).matrix[0] != 16 || (int)(*output).matrix[1] != 11 ||
+	(int)(*output).matrix[2] != 5 || (int)(*output).matrix[3] != 14 ||
+	(int)(*output).matrix[4] != 10 || (int)(*output).matrix[5] != 4)
+	{
+        	printf("--- blad w mnozeniu - macierz c powinna miec nastepujace wartosci:");
+		printf("\n16 11 5\n14 10 4\na ma:\n");
+		matrix_display(*output);
+		return 1;
+	}
+	printf("=== OK! ===\n");
+
+
+//===== TESTY DOT. ZWALNIANIA PAMIECI =====
+	
+	printf("TEST 9 (zwalnianie)\n");
+
+ 	matrix_free(output);
+	printf("=== OK! ===\n");
+	
+	printf("TEST 10 (zwalnianie)\n");
+
+ 	matrix_free(a);
+	printf("=== OK! ===\n");
+
+	printf("TEST 11 (zwalnianie)\n");
+
+ 	matrix_free(b);
+	printf("=== OK! ===\n");
+	
+	printf("TEST 12 (zwalnianie)\n");
+
+ 	matrix_free(c);
+	printf("=== OK! ===\n");
+
+
+//=== TODO ===
+
+	printf("TEST 13 (gleboka siec 3x3)\n");
+
+	matrix_t* input = matrix_alloc(3, 4);
+
+	input->matrix[0] = 8.5; input->matrix[1] = 0.65; input->matrix[2] = 1.2;
+	input->matrix[3] = 9.5; input->matrix[4] = 0.8;  input->matrix[5] = 1.3;
+	input->matrix[6] = 9.9; input->matrix[7] = 0.8;	 input->matrix[8] = 0.5;
+	input->matrix[9] = 9.0; input->matrix[10] = 0.9; input->matrix[11] = 1.0;
+
+
+	struct matrix_dl_array *layer_1_weights = matrix_dll_array_create_elem(3, 3);
+
+	matrix_fill((*layer_1_weights).matrix, 9,0.1, 0.2, -0.1,
+						-0.1, 0.1, 0.9,
+						0.1, 0.4, 0.1);
+
+
+	aux = matrix_dll_array_append(layer_1_weights, 3, 0, 0 ,0);
+
+	if(aux) printf("---funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
+
+
+	matrix_fill((*layer_1_weights).next->matrix, 9,	0.3, 1.1, -0.3,
+						0.1, 0.2, 0.0,
+						0.0, 1.3, 0.1);
+	
+	matrix_t* output1 = deep_neural_network(*input, *layer_1_weights);
+
+	double exp_tab[] = {0.214, 0.145, 0.507,
+			0.204, 0.158, 0.53,
+			-0.584, 0.018, -0.462,
+			-0.015, 0.116, 0.253};
+
+	err = 0;
+	for(int i = 0; i < 12; ++i)
+	{
+		if( output1->matrix[i] > exp_tab[i] + 0.001 ||
+		output1->matrix[i] < exp_tab[i] - 0.001)
+		{
+			printf("---funkcja deep_neural_network zle obliczyla pole %i\n------powinno byc %lf a jest %lf\n", i, exp_tab[i], output1->matrix[i]);
+			++err;
+		}
+	}
+	if(err) printf("-funkcja zle wypelnila %i komorek macierzy\n", err);
+	else	printf("=== OK! ===\n");
+
+
+	matrix_dll_array_free(layer_1_weights);
+	matrix_free(input);
+	matrix_free(output1);
+
+
+	return 0;
+}
