@@ -107,9 +107,30 @@ matrix_multiply(const matrix_t a, const matrix_t b, matrix_t *result,
 	return 0;
 }
 
+
 void
-matrix_fill_rng(matrix_t * a, int min, int max)
+matrix_fill_rng(matrix_t * a, double min, double max)
 {
+	double f;
  	for(unsigned i = 0; i < (a->x) * (a->y); ++i)
-		(*a).matrix[i] = (rand() - min) % max;
+	{
+		f = (double) rand() / RAND_MAX;
+		(*a).matrix[i] = min + f * (max - min);
+	}
+}
+
+
+int
+matrix_substraction(const matrix_t a, const matrix_t b, matrix_t *result)
+{
+	if(result == NULL) return 1;
+//sprawdzam czy wszystkie macierze maja takie same wymiary
+	if(a.x != b.x || a.y != b.y) return 1;
+	if(a.x != result->x || a.y != result->y) return 1;
+
+//odejmowanie
+ 	for(unsigned i = 0; i < (a.x) * (a.y); ++i)
+ 		(*result).matrix[i] = a.matrix[i] - b.matrix[i];            
+
+	return 0;
 }

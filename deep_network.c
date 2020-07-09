@@ -94,7 +94,7 @@ char random_weight_flag, double weight_min_value, double weight_max_value)
 
 //wypelniam losowymi wartosciami (jesli trzeba)
 	if(random_weight_flag)
-		matrix_fill_rng(array->matrix, (int)weight_min_value, (int)weight_max_value);
+		matrix_fill_rng(array->matrix, weight_min_value, weight_max_value);
 
 	return 0;
 }
@@ -105,7 +105,6 @@ matrix_dll_array_free_elem(struct matrix_dl_array *array)
 	if(array == NULL) return;
 	matrix_free((*array).matrix);
 	free(array);
- 	
 }
 
 

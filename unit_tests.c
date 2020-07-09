@@ -216,6 +216,42 @@ int main (void)
 	matrix_dll_array_free(layer_1_weights);
 	matrix_free(input);
 	matrix_free(output1);
+//===== TESTY DOT. ODEJMOWANIA MACIERZY =====
+
+	printf("TEST 18 (odejmowanie macierzy)\n");
+
+	a = matrix_alloc(3, 2);
+	matrix_fill(a, 6,	9.0, 1.0, -4.0,
+				3.0, -5.0, 0.0);
+
+	b = matrix_alloc(3, 2);
+	matrix_fill(b, 6,	6.0, -4.0, 5.0,
+				7.0, -2.0, 3.0);
+
+	c = matrix_alloc(3, 2);
+	aux = matrix_substraction(*a, *b, c);
+
+	if(aux) printf("-funkcja zwrocila %i a powinna 0\n", aux);
+
+	double exp_subs_tab[] = {3, 5, -9,
+				-4, -3, -3};
+
+	err = 0;
+	for(int i = 0; i < 6; ++i)
+	{
+		if( c->matrix[i] > exp_subs_tab[i] + 0.001 ||
+			c->matrix[i] < exp_subs_tab[i] - 0.001)
+		{
+			printf("---funkcja matrix_substraction zle obliczyla pole %i\n------powinno byc %lf a jest %lf\n", i, exp_subs_tab[i], c->matrix[i]);
+			++err;
+		}
+	}
+	if(err) printf("-funkcja zle wypelnila %i komorek macierzy\n", err);
+	else	printf("=== OK! ===\n");
+
+	matrix_free(a);
+	matrix_free(b);
+	matrix_free(c);
 
 
 	return 0;

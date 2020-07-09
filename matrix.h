@@ -33,6 +33,11 @@ int matrix_multiply(const matrix_t a, const matrix_t b, matrix_t *result, char t
 //wypelnianie macierzy randomowymi wartosciami mieszczacymi sie w przedziale
 //min < x < max
 void
-matrix_fill_rng(matrix_t * a, int min, int max);
+matrix_fill_rng(matrix_t * a, double min, double max);
+
+//odejmowanie dwoch macierzy, wynik jest wpisywany do <result>, w przypadku
+//sukcesu zwraca 0, w przeciwnym wypadku 1
+int
+matrix_substraction(const matrix_t a, const matrix_t b, matrix_t *result);
 
 #endif
