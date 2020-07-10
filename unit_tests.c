@@ -218,7 +218,7 @@ int main (void)
 	matrix_free(output1);
 //===== TESTY DOT. ODEJMOWANIA MACIERZY =====
 
-	printf("TEST 18 (odejmowanie macierzy)\n");
+	printf("TEST 14 (odejmowanie macierzy)\n");
 
 	a = matrix_alloc(3, 2);
 	matrix_fill(a, 6,	9.0, 1.0, -4.0,
@@ -253,6 +253,44 @@ int main (void)
 	matrix_free(b);
 	matrix_free(c);
 
+//===== TESTY DOT. ILOCZYNU ZEWNETRZNEGO =====
+
+	printf("TEST 15\n");
+
+	a = matrix_alloc(3, 3);
+	matrix_fill(a, 9,	9.0, 1.0, -4.0,
+				3.0, -5.0, 0.0,
+				7.0, -2.0, 3.0);
+
+	b = matrix_alloc(3, 2);
+	matrix_fill(b, 6,	6.0, -4.0, 5.0,
+				7.0, -2.0, 3.0);
+
+	c = matrix_alloc(3, 3);
+
+	aux = matrix_outer_product(*a, *b, c, 2, 1); 
+	if(aux) printf("-funkcja powinna zwrocic 0 a zwrocila %i\n",aux);
+
+	double exp_outer_product[] = {-28.0, 8.0, -12.0,
+					0.0, 0.0, 0.0,
+					21.0, -6.0, 9.0};
+
+	err = 0;
+	for(unsigned i = 0; i < 9; ++i)
+	{
+		if( c->matrix[i] > exp_outer_product[i] + 0.001 ||
+			c->matrix[i] < exp_outer_product[i] - 0.001)
+		{
+			printf("---funkcja matrix_outer_product zle obliczyla pole %i\n------powinno byc %lf a jest %lf\n", i, exp_outer_product[i], c->matrix[i]);
+			++err;
+		}
+	}
+	if(err) printf("-funkcja zle wypelnila %i komorek macierzy\n", err);
+	else	printf("=== OK! ===\n");
+
+	matrix_free(a);
+	matrix_free(b);
+	matrix_free(c);
 
 	return 0;
 }

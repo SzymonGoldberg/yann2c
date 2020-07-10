@@ -69,4 +69,10 @@ matrix_dll_array_create_elem(unsigned x, unsigned y);
 void
 matrix_dll_array_free(struct matrix_dl_array *array);
 
+//funkcja liczy iloczyn zewnetrzny z wektora ktory powstaje z <x_ptr> kolumny
+//macierzy <a> i z <y_ptr> wiersza macierzy <b> i wpisuje wynik do <result>
+int
+matrix_outer_product(matrix_t a, matrix_t b, matrix_t *result, unsigned x_ptr,
+	unsigned y_ptr);
+
 #endif

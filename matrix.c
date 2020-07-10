@@ -213,3 +213,27 @@ matrix_dll_array_free(struct matrix_dl_array *array)
 		array = ptr;
 	} while(ptr != NULL);
 }
+
+//funkcja liczy iloczyn zewnetrzny z wektora ktory powstaje z <x_ptr> kolumny
+//macierzy <a> i z <y_ptr> wiersza macierzy <b> i wpisuje wynik do <result>
+int
+matrix_outer_product(matrix_t a, matrix_t b, matrix_t *result, unsigned x_ptr,
+	unsigned y_ptr)
+{
+//sprawdzam dane wejsciowe
+ 	if(result == NULL) return 1;
+	if(result->x != b.x || result->y != a.y) return 1;
+	if((a.x - 1) < x_ptr || (b.y - 1) < y_ptr) return 1; 
+
+	for(unsigned i = 0; i < a.y; ++i)
+	{
+		for(unsigned g = 0; g < b.x; ++g)
+		{
+			result->matrix[g + i * a.x]
+				= b.matrix[g + y_ptr * b.x]
+					* a.matrix[x_ptr + i * a.x];
+		}
+	}
+
+	return 0;
+}
