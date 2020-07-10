@@ -4,6 +4,9 @@
 #include <time.h>
 #include "matrix.h"
 
+
+//======= FUNKCJE DO MACIERZY (MATRIX_T) =======
+
 matrix_t*
 matrix_alloc(unsigned x, unsigned y)
 {
@@ -32,6 +35,7 @@ matrix_alloc(unsigned x, unsigned y)
 	return result;
 }
 
+
 void
 matrix_display(const matrix_t a)
 {
@@ -42,6 +46,7 @@ matrix_display(const matrix_t a)
 	}
 	printf("\n");
 }
+
 
 void
 matrix_free(matrix_t *a) {
@@ -137,14 +142,29 @@ matrix_substraction(const matrix_t a, const matrix_t b, matrix_t *result)
 	return 0;
 }
 
+//======= FUNKCJE DO LISTY MACIERZY =======
 
-struct matrix_dl_array *
-matrix_dll_array_create_elem(unsigned x, unsigned y)
+
+struct matrix_array *
+matrix_array_create(void)
+{
+	struct matrix_array * a = (struct matrix_array *)
+				calloc(1, sizeof(struct matrix_array));
+	
+	if(a == NULL) return NULL;
+
+	a->tail = NULL; a->head = NULL;
+	return a;
+}
+
+
+struct matrix_node *
+matrix_node_create(unsigned x, unsigned y)
 {
 //alokacja pamieci na komorke listy z macierza
-	struct matrix_dl_array *
-        	result = (struct matrix_dl_array *)
-			calloc(1, sizeof(struct matrix_dl_array));
+	struct matrix_node *
+        	result = (struct matrix_node *)
+			calloc(1, sizeof(struct matrix_node));
 
 	if(result == NULL) return NULL;
 
@@ -165,75 +185,97 @@ matrix_dll_array_create_elem(unsigned x, unsigned y)
  	return result;
 }
 
+int
+matrix_array_append(struct matrix_array * array, unsigned x, unsigned y)
+{
+//sprawdzam dane wejsciowe
+	if(array == NULL) return 1;
+	if(!x || !y) return 1;
+
+//alokuje pamiec na nowy element listy
+	struct matrix_node *node = matrix_node_create(x, y);
+	if(node == NULL) return 1;
+
+
+//ustawiam odpowiednio zmienne w nowym elemencie
+	if(array->head == NULL) array->head = node;
+	if(array->tail == NULL) array->tail = node;
+	else
+	{
+		array->tail->next = node;
+		node->prev = array->tail;
+		array->tail = node;
+	}
+
+	printf("OK B00MR\n");
+ 	
+	return 0;
+}
+
 
 int
-matrix_dll_array_append(struct matrix_dl_array * array, unsigned int n,
+matrix_array_append_network(struct matrix_array * array, unsigned int n,
 char random_weight_flag, double weight_min_value, double weight_max_value)
 {
 //sprawdzam dane wejsciowe
 	if(array == NULL) return 1;
+	if(array->tail == NULL) return 1;
 	if(n == 0) return 1;
 
-//alokuje pamiec na nowy element listy
-	array->next = matrix_dll_array_create_elem(array->matrix->y, n);
-	if(array->next == NULL) return 1;
-
-//ustawiam odpowiednio zmienne w nowym elemencie
-	array->next->prev = array;
+//dodaje nowy element o odpowiedniej wielkosci
+	if(matrix_array_append(array, array->tail->matrix->y, n)) return 1;
 
 //wypelniam losowymi wartosciami (jesli trzeba)
 	if(random_weight_flag)
-		matrix_fill_rng(array->matrix, weight_min_value, weight_max_value);
+		matrix_fill_rng(array->tail->matrix,
+		weight_min_value, weight_max_value);
 
 	return 0;
 }
 
 
 void
-matrix_dll_array_free_elem(struct matrix_dl_array *array)
+matrix_node_free(struct matrix_node *node)
 {
-	if(array == NULL) return;
-	matrix_free((*array).matrix);
+	if(node == NULL) return;
+	matrix_free((*node).matrix);
+	free(node);
+}
+
+
+void
+matrix_array_free(struct matrix_array *array)
+{
+ 	if(array == NULL) return;
+	if(array->tail == NULL) return;
+	if(array->head == NULL) return;
+
+	struct matrix_node *ptr = array->head;
+	struct matrix_node *aux = array->head;
+	do {
+		ptr = aux->next;
+		matrix_node_free(aux);
+		aux = ptr;
+	} while(ptr != NULL);
+	
 	free(array);
 }
 
+//======= GLOWNIE DO DEBUGU - USUNAC W KONCOWEJ WERSJI =======
 
 void
-matrix_dll_array_free(struct matrix_dl_array *array)
+matrix_array_display(const struct matrix_array* array)
 {
- 	if(array == NULL) return;
-//przeszukuje liste w poszukiwaniu konca
-	while(array->prev != NULL)
-		array = array->prev;
-
-	struct matrix_dl_array *ptr;
+	if(array == NULL) return;
+	struct matrix_node *ptr = array->head;
+	if(ptr == NULL) return;
 	do {
-		ptr = array->next;
-		matrix_dll_array_free_elem(array);
-		array = ptr;
-	} while(ptr != NULL);
-}
+		matrix_display(*ptr->matrix);
 
-//funkcja liczy iloczyn zewnetrzny z wektora ktory powstaje z <x_ptr> kolumny
-//macierzy <a> i z <y_ptr> wiersza macierzy <b> i wpisuje wynik do <result>
-int
-matrix_outer_product(matrix_t a, matrix_t b, matrix_t *result, unsigned x_ptr,
-	unsigned y_ptr)
-{
-//sprawdzam dane wejsciowe
- 	if(result == NULL) return 1;
-	if(result->x != b.x || result->y != a.y) return 1;
-	if((a.x - 1) < x_ptr || (b.y - 1) < y_ptr) return 1; 
-
-	for(unsigned i = 0; i < a.y; ++i)
-	{
-		for(unsigned g = 0; g < b.x; ++g)
-		{
-			result->matrix[g + i * a.x]
-				= b.matrix[g + y_ptr * b.x]
-					* a.matrix[x_ptr + i * a.x];
-		}
-	}
-
-	return 0;
+		if(ptr == array->head) printf("(HEAD)\n");
+		if(ptr == array->tail) printf("(TAIL)\n");
+		ptr = ptr->next;
+                if(ptr == NULL) break;
+		printf("|\n|\nV\n");
+	} while(TRUE);
 }

@@ -12,6 +12,6 @@ matrix_t * neural_network(const matrix_t weights, const matrix_t input);
 //TODO
 //>optymalizacja
 matrix_t *
-deep_neural_network(matrix_t input, struct matrix_dl_array network);
+deep_neural_network(matrix_t input, struct matrix_array network);
 
 #endif

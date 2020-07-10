@@ -175,29 +175,31 @@ int main (void)
 	input->matrix[6] = 9.9; input->matrix[7] = 0.8;	 input->matrix[8] = 0.5;
 	input->matrix[9] = 9.0; input->matrix[10] = 0.9; input->matrix[11] = 1.0;
 
-
-	struct matrix_dl_array *layer_1_weights = matrix_dll_array_create_elem(3, 3);
-
-	matrix_fill((*layer_1_weights).matrix, 9,0.1, 0.2, -0.1,
-						-0.1, 0.1, 0.9,
-						0.1, 0.4, 0.1);
+	struct matrix_array *neural_network = matrix_array_create();
 
 
-	aux = matrix_dll_array_append(layer_1_weights, 3, 0, 0 ,0);
+	matrix_array_append(neural_network, 3, 3);
+
+	matrix_fill(neural_network->tail->matrix, 9,	0.1, 0.2, -0.1,
+							-0.1, 0.1, 0.9,
+       		 					0.1, 0.4, 0.1);
+
+	aux = matrix_array_append_network(neural_network, 3, 0, 0, 0);
+
+	matrix_fill(neural_network->tail->matrix, 9,	0.3, 1.1, -0.3,
+							0.1, 0.2, 0.0,
+	       		 				0.0, 1.3, 0.1);
 
 	if(aux) printf("---funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
 
+	matrix_array_display(neural_network);
 
-	matrix_fill((*layer_1_weights).next->matrix, 9,	0.3, 1.1, -0.3,
-						0.1, 0.2, 0.0,
-						0.0, 1.3, 0.1);
-	
-	matrix_t* output1 = deep_neural_network(*input, *layer_1_weights);
+	matrix_t* output1 = deep_neural_network(*input, *neural_network);
 
-	double exp_tab[] = {0.214, 0.145, 0.507,
-			0.204, 0.158, 0.53,
-			-0.584, 0.018, -0.462,
-			-0.015, 0.116, 0.253};
+	double exp_tab[] = {	0.214,	0.145,	0.507,
+				0.204,	0.158,	0.53,
+				-0.584, 0.018,	-0.462,
+       		 		-0.015, 0.116,	0.253};
 
 	err = 0;
 	for(int i = 0; i < 12; ++i)
@@ -212,10 +214,10 @@ int main (void)
 	if(err) printf("-funkcja zle wypelnila %i komorek macierzy\n", err);
 	else	printf("=== OK! ===\n");
 
-
-	matrix_dll_array_free(layer_1_weights);
+	matrix_array_free(neural_network);
 	matrix_free(input);
 	matrix_free(output1);
+
 //===== TESTY DOT. ODEJMOWANIA MACIERZY =====
 
 	printf("TEST 14 (odejmowanie macierzy)\n");
@@ -255,42 +257,6 @@ int main (void)
 
 //===== TESTY DOT. ILOCZYNU ZEWNETRZNEGO =====
 
-	printf("TEST 15\n");
-
-	a = matrix_alloc(3, 3);
-	matrix_fill(a, 9,	9.0, 1.0, -4.0,
-				3.0, -5.0, 0.0,
-				7.0, -2.0, 3.0);
-
-	b = matrix_alloc(3, 2);
-	matrix_fill(b, 6,	6.0, -4.0, 5.0,
-				7.0, -2.0, 3.0);
-
-	c = matrix_alloc(3, 3);
-
-	aux = matrix_outer_product(*a, *b, c, 2, 1); 
-	if(aux) printf("-funkcja powinna zwrocic 0 a zwrocila %i\n",aux);
-
-	double exp_outer_product[] = {-28.0, 8.0, -12.0,
-					0.0, 0.0, 0.0,
-					21.0, -6.0, 9.0};
-
-	err = 0;
-	for(unsigned i = 0; i < 9; ++i)
-	{
-		if( c->matrix[i] > exp_outer_product[i] + 0.001 ||
-			c->matrix[i] < exp_outer_product[i] - 0.001)
-		{
-			printf("---funkcja matrix_outer_product zle obliczyla pole %i\n------powinno byc %lf a jest %lf\n", i, exp_outer_product[i], c->matrix[i]);
-			++err;
-		}
-	}
-	if(err) printf("-funkcja zle wypelnila %i komorek macierzy\n", err);
-	else	printf("=== OK! ===\n");
-
-	matrix_free(a);
-	matrix_free(b);
-	matrix_free(c);
 
 	return 0;
 }

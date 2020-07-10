@@ -13,10 +13,15 @@ typedef struct
 } matrix_t;
 
 //dwustronna lista macierzy
-struct matrix_dl_array {
+struct matrix_node {
  	matrix_t *matrix;
-	struct matrix_dl_array *next;
-	struct matrix_dl_array *prev;
+	struct matrix_node *next;
+	struct matrix_node *prev;
+};
+
+struct matrix_array {
+ 	struct matrix_node *head;
+	struct matrix_node *tail;
 };
 
 //funkcja alokujaca pamiec na macierz o wymiarach x i y, zwraca adres na nowa
@@ -47,32 +52,39 @@ matrix_fill_rng(matrix_t * a, double min, double max);
 int
 matrix_substraction(const matrix_t a, const matrix_t b, matrix_t *result);
 
+
+//zwykly append listy, dodaje nowy element z macierza o wielkosci <x,y>
+//w przypadku sukcesu 0, w przypadku porazki 1
+int
+matrix_array_append(struct matrix_array * array, unsigned x, unsigned y);
+
+//apend zrobiony pod sieci neuronowe
 //funkcja dodaje do listy macierzy <array>, nastepna macierz reprezentujaca
 //<N> neuronow, jesli flaga <random_weight_flag> jest ustawiona funkcja wypelnia
 //nowa warstwe randomowymi wartosciami od <weight_min_value> do <weight_max_value>
 //odpowiednik <add_layer> w pdfie PSI
 int
-matrix_dll_array_append(struct matrix_dl_array * array, unsigned int n,
+matrix_array_append_network(struct matrix_array * array, unsigned int n,
 char random_weight_flag, double weight_min_value, double weight_max_value);
 
 //zwalnia pamiec przydzielona na pojedynczy element listy macierzy
 void
-matrix_dll_array_free_elem(struct matrix_dl_array *array);
+matrix_node_free(struct matrix_node *array);
 
 //tworzy pojedynczy element listy z macierzami, macierz ma wymiary x,y
 //zwraca adres na nowa liste w przypadku sukcesu, w przypadku porazki nulla
-struct matrix_dl_array *
-matrix_dll_array_create_elem(unsigned x, unsigned y);
+struct matrix_node *
+matrix_node_create(unsigned x, unsigned y);
 
-//szuka poczatku listy (prev = nul) i zwalnia kazdy element do samego konca
-//(next = nul)
+//zwalnia pamiec przydzielona na kazdy pojedyczny element listy oraz na sama liste
 void
-matrix_dll_array_free(struct matrix_dl_array *array);
+matrix_array_free(struct matrix_array *array);
 
-//funkcja liczy iloczyn zewnetrzny z wektora ktory powstaje z <x_ptr> kolumny
-//macierzy <a> i z <y_ptr> wiersza macierzy <b> i wpisuje wynik do <result>
-int
-matrix_outer_product(matrix_t a, matrix_t b, matrix_t *result, unsigned x_ptr,
-	unsigned y_ptr);
+//tworzy pusta strukture matrix_array
+struct matrix_array *
+matrix_array_create(void);
+
+void
+matrix_array_display(const struct matrix_array* array);
 
 #endif

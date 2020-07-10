@@ -21,17 +21,18 @@ neural_network(const matrix_t input, const matrix_t weights)
 }
 
 matrix_t *
-deep_neural_network(matrix_t input, struct matrix_dl_array network)
+deep_neural_network(matrix_t input, struct matrix_array network)
 {
 //sprawdzam dane wejsciowe
-	if(network.matrix == NULL) return NULL;
- 	if(input.x != network.matrix->x) return NULL;
+	if(network.head == NULL) return NULL;
+	if(network.tail == NULL) return NULL;
+ 	if(input.x != network.head->matrix->x) return NULL;
 
 //wskazniki pomocnicze
 	matrix_t* mid_output = &input;
 	matrix_t* output;
 	int i = 0;
-	struct matrix_dl_array * ptr = &network;
+	struct matrix_node * ptr = network.head;
 
 	while(ptr != NULL)
 	{
