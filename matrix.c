@@ -51,6 +51,7 @@ matrix_free(matrix_t *a) {
 	}
 }
 
+
 int
 matrix_fill(matrix_t *a, unsigned int N, ...)
 {
@@ -71,6 +72,7 @@ matrix_fill(matrix_t *a, unsigned int N, ...)
 	va_end(list);
 	return 0;
 }
+
 
 int
 matrix_multiply(const matrix_t a, const matrix_t b, matrix_t *result,
@@ -133,4 +135,81 @@ matrix_substraction(const matrix_t a, const matrix_t b, matrix_t *result)
  		(*result).matrix[i] = a.matrix[i] - b.matrix[i];            
 
 	return 0;
+}
+
+
+struct matrix_dl_array *
+matrix_dll_array_create_elem(unsigned x, unsigned y)
+{
+//alokacja pamieci na komorke listy z macierza
+	struct matrix_dl_array *
+        	result = (struct matrix_dl_array *)
+			calloc(1, sizeof(struct matrix_dl_array));
+
+	if(result == NULL) return NULL;
+
+//alokacja pamieci strukture macierzy
+	(*result).matrix = matrix_alloc(x, y);
+	if( (*result).matrix == NULL )
+	{
+         	free(result);
+		return NULL;
+	}
+
+//co prawda nie powinno byc z tym problemu bo calloc wszystko zeruje przy
+//alokacji ale dla swietego spokoju ustawiam pozostale zmienne w strukturze
+//z lista
+	result->next = NULL;
+	result->prev = NULL;
+
+ 	return result;
+}
+
+
+int
+matrix_dll_array_append(struct matrix_dl_array * array, unsigned int n,
+char random_weight_flag, double weight_min_value, double weight_max_value)
+{
+//sprawdzam dane wejsciowe
+	if(array == NULL) return 1;
+	if(n == 0) return 1;
+
+//alokuje pamiec na nowy element listy
+	array->next = matrix_dll_array_create_elem(array->matrix->y, n);
+	if(array->next == NULL) return 1;
+
+//ustawiam odpowiednio zmienne w nowym elemencie
+	array->next->prev = array;
+
+//wypelniam losowymi wartosciami (jesli trzeba)
+	if(random_weight_flag)
+		matrix_fill_rng(array->matrix, weight_min_value, weight_max_value);
+
+	return 0;
+}
+
+
+void
+matrix_dll_array_free_elem(struct matrix_dl_array *array)
+{
+	if(array == NULL) return;
+	matrix_free((*array).matrix);
+	free(array);
+}
+
+
+void
+matrix_dll_array_free(struct matrix_dl_array *array)
+{
+ 	if(array == NULL) return;
+//przeszukuje liste w poszukiwaniu konca
+	while(array->prev != NULL)
+		array = array->prev;
+
+	struct matrix_dl_array *ptr;
+	do {
+		ptr = array->next;
+		matrix_dll_array_free_elem(array);
+		array = ptr;
+	} while(ptr != NULL);
 }
