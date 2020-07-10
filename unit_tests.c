@@ -164,7 +164,7 @@ int main (void)
 	printf("=== OK! ===\n");
 
 
-//=== TODO ===
+//=== TESTY SIECI GLEBOKICH ===
 
 	printf("TEST 13 (gleboka siec 3x3)\n");
 
@@ -191,8 +191,6 @@ int main (void)
 	       		 				0.0, 1.3, 0.1);
 
 	if(aux) printf("---funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
-
-	matrix_array_display(neural_network);
 
 	matrix_t* output1 = deep_neural_network(*input, *neural_network);
 
@@ -255,7 +253,36 @@ int main (void)
 	matrix_free(b);
 	matrix_free(c);
 
-//===== TESTY DOT. ILOCZYNU ZEWNETRZNEGO =====
+//===== TESTY DOT. MNOZENIA MACIERZY PRZEZ LICZBE =====
+
+	printf("TEST 15 (mnozenie macierzy przez liczbe)\n");
+
+	a = matrix_alloc(2, 2);
+	matrix_fill(a, 4,	1.0, 3.0,
+				8.0, 6.0);
+
+	b = matrix_alloc(2, 2);
+        aux = matrix_multiply_by_num(*a, (double) 5, b);
+
+	if(aux) printf("-funkcja zwrocila %i a powinna 0\n", aux);
+
+	double exp_mult_by_num[] = { 5.0, 15.0, 40.0, 30.0 };
+
+	err = 0;
+	for(int i = 0; i < 4; ++i)
+	{
+		if( b->matrix[i] > exp_mult_by_num[i] + 0.001 ||
+			b->matrix[i] < exp_mult_by_num[i] - 0.001)
+		{
+			printf("---funkcja matrix_substraction zle obliczyla pole %i\n------powinno byc %lf a jest %lf\n", i, exp_mult_by_num[i], b->matrix[i]);
+			++err;
+		}
+	}
+	if(err) printf("-funkcja zle wypelnila %i komorek macierzy\n", err);
+	else	printf("=== OK! ===\n");
+
+	matrix_free(a);
+	matrix_free(b);
 
 
 	return 0;

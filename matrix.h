@@ -40,7 +40,8 @@ int matrix_fill(matrix_t *a, unsigned int N, ...);
 //mnozenie macierzy a przez b i wpisywanie wyniku do macierzy result
 //jesli transposed jest ustawione na 1 macierz b jest macierza transponowana
 //w przypadku sukcesu 0, nieprawidlowe dane 1, niemozliwosc przemnozenia 2
-int matrix_multiply(const matrix_t a, const matrix_t b, matrix_t *result, char transposed);
+int matrix_multiply(const matrix_t a, const matrix_t b,
+			matrix_t *result, char transposed);
 
 //wypelnianie macierzy randomowymi wartosciami mieszczacymi sie w przedziale
 //min < x < max
@@ -51,6 +52,11 @@ matrix_fill_rng(matrix_t * a, double min, double max);
 //sukcesu zwraca 0, w przeciwnym wypadku 1
 int
 matrix_substraction(const matrix_t a, const matrix_t b, matrix_t *result);
+
+//mnozy macierz <a> przez wartosc liczbowa <b> i zapisuje wynik w macierzy
+//<result>, w przypadku sukcesu zwraca 0, w innym - 1
+int
+matrix_multiply_by_num(const matrix_t a, const double b, matrix_t *result);
 
 
 //zwykly append listy, dodaje nowy element z macierza o wielkosci <x,y>
