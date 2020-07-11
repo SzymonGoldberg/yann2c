@@ -156,6 +156,25 @@ matrix_multiply_by_num(const matrix_t a, const double b, matrix_t *result)
 	return 0;
 }
 
+//przyjmuje dwie jednowymiarowe macierze (wektory z y = 1) i tworzy z nich
+//nowa macierz, w przypadku sukcesu - 0, porazka - 1
+int
+outer_product(const matrix_t a, const matrix_t b, matrix_t *result)
+{
+//sprawdzam dane wejsciowe
+	if(result == NULL) return 1;
+	if(result->x != b.x || result->y != a.x) return 1;
+
+
+	for(unsigned g = 0; g < a.x; ++g)
+		for(unsigned i = 0; i < b.x; ++i)
+			result->matrix[i + b.x * g] =  b.matrix[i] * a.matrix[g];
+
+
+
+	return 0;
+}
+
 //======= FUNKCJE DO LISTY MACIERZY =======
 
 

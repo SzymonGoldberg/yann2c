@@ -58,6 +58,10 @@ matrix_substraction(const matrix_t a, const matrix_t b, matrix_t *result);
 int
 matrix_multiply_by_num(const matrix_t a, const double b, matrix_t *result);
 
+//przyjmuje dwie jednowymiarowe macierze (wektory z y = 1) i tworzy z nich
+//nowa macierz, w przypadku sukcesu - 0, porazka - 1
+int outer_product(const matrix_t a, const matrix_t b, matrix_t *result);
+
 
 //zwykly append listy, dodaje nowy element z macierza o wielkosci <x,y>
 //w przypadku sukcesu 0, w przypadku porazki 1
