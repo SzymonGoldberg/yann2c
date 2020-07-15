@@ -221,10 +221,76 @@ int main (void)
 	}
 	puts("=== OK! ===");
 
+//======= TESTY SIECI =======
 
 
+	puts("TEST 11 ---nn_create---");
+
+	struct nn_array *nn = nn_create();
+	if(nn == NULL)
+	{
+		puts("---Funkcja powinna zwrocic adres a zwrocila NULL");
+		return 1;
+	}
+	else puts("=== OK! ===");
 
 
+	puts("TEST 12 ---nn_add_layer---");
+
+	aux = nn_add_layer(NULL, 3, 3);
+	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
+	else puts("=== OK! ===");
+
+
+	puts("TEST 13 ---nn_add_layer---");
+
+	aux = nn_add_layer(nn, 0, 3);
+	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
+	else puts("=== OK! ===");
+
+	puts("TEST 14 ---nn_add_layer---");
+
+	aux = nn_add_layer(nn, 3, 0);
+	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
+	else puts("=== OK! ===");
+
+
+	puts("TEST 15 ---nn_add_layer---");
+
+	aux = nn_add_layer(nn, 3, 3);
+	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
+	else puts("=== OK! ===");
+
+
+	puts("TEST 16 ---nn_predict---");
+
+	matrix_fill(nn->tail->weights, 9,	0.1, 0.1,-0.3,
+						0.1, 0.2, 0.0,
+				       		0.0, 1.3, 0.1);
+
+ 	matrix_t *input = matrix_alloc(3, 1);
+	matrix_fill(input, 3, 8.5, 0.65, 1.2);
+
+	nn_predict(nn, input);
+	double exp_predict0[] = {0.555, 0.98, 0.965};
+
+	err = 0;
+ 	for(int i = 0; i < 3; ++i)
+	{
+		if(nn->tail->output->matrix[i] > exp_predict0[i] + 0.001 ||
+	       	   nn->tail->output->matrix[i] < exp_predict0[i] - 0.001)
+		{
+                	printf("-Funkcja zle wypelnila %i komorke macierzy\n", i);
+			printf("--powinno byc %lf a jest %lf\n",
+			exp_predict0[i], nn->tail->output->matrix[i]);
+			++err;
+		}
+	}
+	if(err) {
+		printf("---Funkcja zapelnila nieprawidlowo %i komorek macierzy\n", err);
+		return 1;
+	}
+	puts("=== OK! ===");
 	
 //=== zwalnianie pamieci przydzielonej na macierzy ===
 
@@ -233,6 +299,10 @@ int main (void)
 	matrix_free(c);
 	matrix_free(d);
 	matrix_free(e);
+
+//=== zwalnianie pamieci przydzielonej na sieci ===
+
+	nn_free(nn);
 
 	return 0;
 }

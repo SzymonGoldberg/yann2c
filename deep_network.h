@@ -29,4 +29,28 @@ matrix_t * neural_network(const matrix_t weights, const matrix_t input);
 matrix_t *
 deep_neural_network(matrix_t input, struct matrix_array network);
 
+//funkcja tworzy pusta strukture sieci
+//w przypadku sukcesu zwraca jej adres, w innym przypadku zwraca NULL
+struct nn_array * nn_create(void);
+
+struct nn_layer * nn_layer_create(unsigned x, unsigned y);
+
+//funkcja dodaje siec <size> neuronow na koniec struktury <nn> (tail)
+//jesli struktura byla pusta to pierwsza macierz ma wymiary <input>, <size>
+//w przypadku istniejacych juz wczesniej warstw
+//funkcja ma rozmiar wyjscie poprzedniej warstwy, <size>
+//zwraca 0 w przypadku porazki, w innym przypadku 1
+int nn_add_layer(struct nn_array *nn, unsigned size, unsigned input);
+
+//zwalnia cala pamiec przydzielona na strukture <nn>
+void nn_free(struct nn_array *nn);
+
+//przelicza odpowiedz sieci <nn> na wejscie <input> w postaci wektora
+//czyli macierzy dla ktorej y = 1
+//w przypadku sukcesu 0, w innym wypadku !0
+int nn_predict(struct nn_array *nn, const matrix_t *input);
+
+//wyswietlanie <nn> w formie macierzy wag i ostatnich odpowiedzi
+void nn_display(const struct nn_array *nn);
+
 #endif

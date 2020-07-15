@@ -54,8 +54,6 @@ deep_neural_network(matrix_t input, struct matrix_array network)
 //======= FUNKCJE OBSLUGUJE STRUKTURY DANYCH SIECI =======
 
 
-//funkcja tworzy pusta strukture sieci
-//w przypadku sukcesu zwraca jej adres, w innym przypadku zwraca NULL
 struct nn_array *
 nn_create(void)
 {
@@ -94,11 +92,6 @@ nn_layer_create(unsigned x, unsigned y)
 }
 
 
-//funkcja dodaje siec <size> neuronow na koniec struktury <nn> (tail)
-//jesli struktura byla pusta to pierwsza macierz ma wymiary <input>, <size>
-//w przypadku istniejacych juz wczesniej warstw
-//funkcja ma rozmiar wyjscie poprzedniej warstwy, <size>
-//zwraca 0 w przypadku porazki, w innym przypadku 1
 int
 nn_add_layer(struct nn_array *nn, unsigned size, unsigned input)
 {
@@ -129,7 +122,6 @@ nn_add_layer(struct nn_array *nn, unsigned size, unsigned input)
 }
 
 
-//zwalnia cala pamiec przydzielona na strukture <nn>
 void
 nn_free(struct nn_array *nn)
 {
@@ -147,11 +139,11 @@ nn_free(struct nn_array *nn)
 
 		aux = ptr;
 	} while(ptr != NULL);
+
+	free(nn);
 }
 
-//przelicza odpowiedz sieci <nn> na wejscie <input> w postaci wektora
-//czyli macierzy dla ktorej y = 1
-//w przypadku sukcesu 0, w innym wypadku !0
+
 int
 nn_predict(struct nn_array *nn, const matrix_t *input)
 {
@@ -164,7 +156,7 @@ nn_predict(struct nn_array *nn, const matrix_t *input)
 //pozostale mnozenia wykonywac na poprzednich wyjsciach neuronow
 	int i = 0;
 	do {
- 		if(i) {
+ 		if(!i) {
 			matrix_multiply( *input,
 					*(ptr->weights),
 					ptr->output, 1);
@@ -176,10 +168,12 @@ nn_predict(struct nn_array *nn, const matrix_t *input)
 					ptr->output, 1);
 		}
 		ptr = ptr->next;
-	} while(1);
+	} while(ptr != NULL);
+
+	return 0;
 }
 
-//wyswietlanie <nn> w formie macierzy wag i ostatnich odpowiedzi
+
 void
 nn_display(const struct nn_array *nn)
 {
@@ -187,12 +181,12 @@ nn_display(const struct nn_array *nn)
 	struct nn_layer *ptr = nn->head;
 	while(ptr != NULL)
 	{
-		puts("WEIGHTS:\n");
+		puts("WEIGHTS:");
 		matrix_display(*(ptr->weights));
-		puts("OUTPUT:\n");
+		puts("\nOUTPUT:");
 		matrix_display(*(ptr->output));
- 		if(ptr == nn->head) puts("(HEAD)\n");
- 		if(ptr == nn->tail) puts("(TAIL)\n");
+ 		if(ptr == nn->head) puts("(HEAD)");
+ 		if(ptr == nn->tail) puts("(TAIL)");
 		if(ptr->next != NULL) puts("|\n|\nV\n");
 		ptr = ptr->next;
 	}
