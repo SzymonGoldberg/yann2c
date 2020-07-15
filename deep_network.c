@@ -94,8 +94,10 @@ nn_layer_create(unsigned x, unsigned y)
 }
 
 
-//funkcja dodaje siec <size> neuronow do struktury <nn>
-//jesli struktura byla pusta to pierwsza macierz ma wymiary <input, size>
+//funkcja dodaje siec <size> neuronow na koniec struktury <nn> (tail)
+//jesli struktura byla pusta to pierwsza macierz ma wymiary <input>, <size>
+//w przypadku istniejacych juz wczesniej warstw
+//funkcja ma rozmiar wyjscie poprzedniej warstwy, <size>
 //zwraca 0 w przypadku porazki, w innym przypadku 1
 int
 nn_add_layer(struct nn_array *nn, unsigned size, unsigned input)
