@@ -183,7 +183,7 @@ nn_predict(struct nn_array *nn, const matrix_t *input)
 void
 nn_display(const struct nn_array *nn)
 {
-	if(nn = NULL) return;
+	if(nn == NULL) return;
 	struct nn_layer *ptr = nn->head;
 	while(ptr != NULL)
 	{
@@ -191,8 +191,8 @@ nn_display(const struct nn_array *nn)
 		matrix_display(*(ptr->weights));
 		puts("OUTPUT:\n");
 		matrix_display(*(ptr->output));
- 		if(ptr = nn->head) puts("(HEAD)\n");
- 		if(ptr = nn->tail) puts("(TAIL)\n");
+ 		if(ptr == nn->head) puts("(HEAD)\n");
+ 		if(ptr == nn->tail) puts("(TAIL)\n");
 		if(ptr->next != NULL) puts("|\n|\nV\n");
 		ptr = ptr->next;
 	}

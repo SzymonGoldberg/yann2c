@@ -53,10 +53,10 @@ matrix_fill_rng(matrix_t * a, double min, double max);
 int
 matrix_substraction(const matrix_t a, const matrix_t b, matrix_t *result);
 
-//mnozy macierz <a> przez wartosc liczbowa <b> i zapisuje wynik w macierzy
-//<result>, w przypadku sukcesu zwraca 0, w innym - 1
+//mnozy kazda komorke macierzy <a> przez wartosc liczbowa <b>
+//w przypadku sukcesu zwraca 0, w innym - 1
 int
-matrix_multiply_by_num(const matrix_t a, const double b, matrix_t *result);
+matrix_multiply_by_num(matrix_t *a, const double b);
 
 //przyjmuje dwie jednowymiarowe macierze (wektory z y = 1) i tworzy z nich
 //nowa macierz, w przypadku sukcesu - 0, porazka - 1

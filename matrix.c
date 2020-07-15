@@ -144,14 +144,12 @@ matrix_substraction(const matrix_t a, const matrix_t b, matrix_t *result)
 
 
 int
-matrix_multiply_by_num(const matrix_t a, const double b, matrix_t *result)
+matrix_multiply_by_num(matrix_t *a, const double b)
 {
-//sprawdzam dane wejsciowe
-	if(result == NULL) return 1;
-	if(result->x != a.x || result->y != a.y) return 1;
+	if(a == NULL) return 1;
 
-	for(unsigned i = 0; i < (a.x) * (a.y); ++i)
-		result->matrix[i] = a.matrix[i] * b;
+	for(unsigned i = 0; i < (a->x) * (a->y); ++i)
+		a->matrix[i] = a->matrix[i] * b;
 
 	return 0;
 }
