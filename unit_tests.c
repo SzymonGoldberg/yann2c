@@ -171,12 +171,68 @@ int main (void)
 	}
 	puts("=== OK! ===");
 
+//====== TESTY ODEJMOWANIA MACIERZY =======
+
+
+	puts("TEST 8 ---matrix_substraction---");
+
+	aux = matrix_substraction(*a, *b, NULL);
+	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
+	else puts("=== OK! ===");
+
+
+	puts("TEST 9 ---matrix_substraction---");
+
+	matrix_t *d = matrix_alloc(2, 3);
+	matrix_t *e = matrix_alloc(2, 3);
+
+	aux = matrix_substraction(*a, *d, e);
+	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
+	else puts("=== OK! ===");
+
+
+	puts("TEST 10 ---matrix_substraction---");
+
+	matrix_fill(d, 6,	3.0,	8.0,
+				1.0,	-13.0,
+				2.5,	-4.12);
+
+	aux = matrix_substraction(*b, *d, e);
+	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
+
+	double exp_subs0[] =    {12.0,	-3.0,
+				9.0,	18.0,
+				2.5,	4.12};
+	err = 0;
+ 	for(int i = 0; i < 6; ++i)
+	{
+		if(	e->matrix[i] > exp_subs0[i] + 0.001 ||
+	       		e->matrix[i] < exp_subs0[i] - 0.001)
+		{
+                	printf("-Funkcja zle wypelnila %i komorke macierzy\n", i);
+			printf("--powinno byc %lf a jest %lf\n",
+				exp_subs0[i], e->matrix[i]);
+			++err;
+		}
+	}
+	if(err) {
+		printf("---Funkcja zapelnila nieprawidlowo %i komorek macierzy\n", err);
+		return 1;
+	}
+	puts("=== OK! ===");
+
+
+
+
+
 	
 //=== zwalnianie pamieci przydzielonej na macierzy ===
 
 	matrix_free(a);
 	matrix_free(b);
 	matrix_free(c);
+	matrix_free(d);
+	matrix_free(e);
 
 	return 0;
 }
