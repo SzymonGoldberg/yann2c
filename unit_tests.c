@@ -332,6 +332,42 @@ int main (void)
 	matrix_free(d);
 	matrix_free(e);
 
+	puts("TEST 18 ---outer_product---");
+
+	a = matrix_alloc(3, 1);
+	matrix_fill(a, 3,	0.455, -0.02, 0.865);
+
+	b = matrix_alloc(3, 1);
+	matrix_fill(b, 3,	8.5, 0.65, 1.2);
+
+	c = matrix_alloc(3, 3);
+
+	outer_product(*a, *b, c);
+
+	double exp_outer[] =	{3.8675, 0.29575, 0.546,
+				-0.17, -0.013, -0.024,
+				7.3525, 0.56225, 1.038};
+
+	err = 0;
+	for(int i = 0; i < 9; ++i)
+	{
+		if( c->matrix[i] > exp_outer[i] + 0.001 ||
+			c->matrix[i] < exp_outer[i] - 0.001)
+		{
+			printf("-funkcja zle obliczyla pole %i\n", i);
+			printf("--powinno byc %lf a jest %lf\n",
+				exp_outer[i], c->matrix[i]);
+			++err;
+		}
+	}
+	if(err) printf("---funkcja zle wypelnila %i komorek macierzy\n", err);
+	else	printf("=== OK! ===\n");
+
+	matrix_free(a);
+	matrix_free(b);
+	matrix_free(c);
+
+
 //=== zwalnianie pamieci przydzielonej na sieci ===
 
 	nn_free(nn);
