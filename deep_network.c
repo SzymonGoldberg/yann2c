@@ -174,6 +174,22 @@ nn_predict(struct nn_array *nn, const matrix_t *input)
 }
 
 
+int
+nn_backpropagation(struct nn_array *nn, const matrix_t *expected_output)
+{
+//sprawdzanie danych wejsciowych
+	if(nn ==NULL || expected_output == NULL) return 1;
+	if(nn->tail->output->x != expected_output->x) return 1;
+//obliczanie delty wyjscia
+	matrix_t *delta = matrix_alloc(expected_output->x, 1);
+	if(matrix_substraction(*(nn->tail->output), *expected_output, delta)) return 1;
+
+	matrix_display(*delta);
+
+	return 0;
+}
+
+
 void
 nn_display(const struct nn_array *nn)
 {

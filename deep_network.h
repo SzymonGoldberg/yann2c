@@ -53,4 +53,6 @@ int nn_predict(struct nn_array *nn, const matrix_t *input);
 //wyswietlanie <nn> w formie macierzy wag i ostatnich odpowiedzi
 void nn_display(const struct nn_array *nn);
 
+int nn_backpropagation(struct nn_array *nn, const matrix_t *expected_output);
+
 #endif

@@ -367,6 +367,32 @@ int main (void)
 	matrix_free(b);
 	matrix_free(c);
 
+	nn_free(nn);
+
+	puts("TEST 19 ---nn_backpropagation---");
+
+	nn = nn_create();
+
+	nn_add_layer(nn, 1, 1);
+	matrix_fill(nn->tail->weights, 1, 0.1);
+
+	nn_add_layer(nn, 1, 1);
+	matrix_fill(nn->tail->weights, 1, 0.3);
+
+	a = matrix_alloc(1, 1);
+	matrix_fill(a, 1, 8.5);
+
+	nn_predict(nn, a);
+
+	nn_display(nn);
+
+	b = matrix_alloc(1, 1);
+	matrix_fill(b, 1, 0.1);
+
+	nn_backpropagation(nn, b);
+
+	matrix_free(a);
+
 
 //=== zwalnianie pamieci przydzielonej na sieci ===
 
