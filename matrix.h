@@ -68,15 +68,6 @@ int outer_product(const matrix_t a, const matrix_t b, matrix_t *result);
 int
 matrix_array_append(struct matrix_array * array, unsigned x, unsigned y);
 
-//apend zrobiony pod sieci neuronowe
-//funkcja dodaje do listy macierzy <array>, nastepna macierz reprezentujaca
-//<N> neuronow, jesli flaga <random_weight_flag> jest ustawiona funkcja wypelnia
-//nowa warstwe randomowymi wartosciami od <weight_min_value> do <weight_max_value>
-//odpowiednik <add_layer> w pdfie PSI
-int
-matrix_array_append_network(struct matrix_array * array, unsigned int n,
-char random_weight_flag, double weight_min_value, double weight_max_value);
-
 //zwalnia pamiec przydzielona na pojedynczy element listy macierzy
 void
 matrix_node_free(struct matrix_node *array);

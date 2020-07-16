@@ -242,48 +242,21 @@ matrix_array_append(struct matrix_array * array, unsigned x, unsigned y)
 }
 
 
-int
-matrix_array_append_network(struct matrix_array * array, unsigned int n,
-char random_weight_flag, double weight_min_value, double weight_max_value)
-{
-//sprawdzam dane wejsciowe
-	if(array == NULL) return 1;
-	if(array->tail == NULL) return 1;
-	if(n == 0) return 1;
-
-//dodaje nowy element o odpowiedniej wielkosci
-	if(matrix_array_append(array, array->tail->matrix->y, n)) return 1;
-
-//wypelniam losowymi wartosciami (jesli trzeba)
-	if(random_weight_flag)
-		matrix_fill_rng(array->tail->matrix,
-		weight_min_value, weight_max_value);
-
-	return 0;
-}
-
-
-void
-matrix_node_free(struct matrix_node *node)
-{
-	if(node == NULL) return;
-	matrix_free((*node).matrix);
-	free(node);
-}
-
-
 void
 matrix_array_free(struct matrix_array *array)
 {
  	if(array == NULL) return;
-	if(array->tail == NULL) return;
+	if(array->tail == NULL) {free(array); return;}
 	if(array->head == NULL) return;
 
 	struct matrix_node *ptr = array->head;
 	struct matrix_node *aux = array->head;
 	do {
 		ptr = aux->next;
-		matrix_node_free(aux);
+
+		if(aux->matrix != NULL) matrix_free(aux->matrix);
+		free(aux);
+
 		aux = ptr;
 	} while(ptr != NULL);
 	
@@ -297,14 +270,12 @@ matrix_array_display(const struct matrix_array* array)
 {
 	if(array == NULL) return;
 	struct matrix_node *ptr = array->head;
-	if(ptr == NULL) return;
-	do {
+	while(ptr != NULL)
+	{
 		matrix_display(*ptr->matrix);
-
 		if(ptr == array->head) printf("(HEAD)\n");
 		if(ptr == array->tail) printf("(TAIL)\n");
+                if(ptr != NULL) printf("|\n|\nV\n");
 		ptr = ptr->next;
-                if(ptr == NULL) break;
-		printf("|\n|\nV\n");
-	} while(TRUE);
+	}
 }
