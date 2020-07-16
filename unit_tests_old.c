@@ -9,29 +9,6 @@ int main (void)
 {
 
 
-//===== TESTY DOT. OBLICZANIA ODP SIECI =====
-
-	printf("TEST 8 (siec neuronowa - 1 warstwa, 4 serie)\n");
-
-	matrix_t* output = neural_network(*c, *b);
-	if(output == NULL)
-	{
-		printf("Funkcja powinna zwrocic wskaznik na strukture a zwrocila NULL\n");
-		return 1;
-	}
-
-	if((int)(*output).matrix[0] != 16 || (int)(*output).matrix[1] != 11 ||
-	(int)(*output).matrix[2] != 5 || (int)(*output).matrix[3] != 14 ||
-	(int)(*output).matrix[4] != 10 || (int)(*output).matrix[5] != 4)
-	{
-        	printf("--- blad w mnozeniu - macierz c powinna miec nastepujace wartosci:");
-		printf("\n16 11 5\n14 10 4\na ma:\n");
-		matrix_display(*output);
-		return 1;
-	}
-	printf("=== OK! ===\n");
-
-
 //=== TESTY SIECI GLEBOKICH ===
 
 	printf("TEST 13 (gleboka siec 3x3)\n");

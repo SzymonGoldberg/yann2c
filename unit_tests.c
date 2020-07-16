@@ -268,10 +268,10 @@ int main (void)
 						0.1, 0.2, 0.0,
 				       		0.0, 1.3, 0.1);
 
- 	matrix_t *input = matrix_alloc(3, 1);
-	matrix_fill(input, 3, 8.5, 0.65, 1.2);
+ 	matrix_t *input0 = matrix_alloc(3, 1);
+	matrix_fill(input0, 3, 8.5, 0.65, 1.2);
 
-	nn_predict(nn, input);
+	nn_predict(nn, input0);
 	double exp_predict0[] = {0.555, 0.98, 0.965};
 
 	err = 0;
@@ -291,6 +291,38 @@ int main (void)
 		return 1;
 	}
 	puts("=== OK! ===");
+
+
+	puts("TEST 17 ---nn_predict---");
+	matrix_fill(nn->tail->weights, 9,	0.1, 0.2,-0.1,
+					       -0.1, 0.1, 0.9,
+				       		0.1, 0.4, 0.1);
+	aux = nn_add_layer(nn, 3, 3);
+
+	matrix_fill(nn->tail->weights, 9,	0.3, 1.1,-0.3,
+					      	0.1, 0.2, 0.0,
+				       		0.0, 1.3, 0.1);
+	nn_predict(nn, input0);
+
+	double exp_predict1[] = {0.2135, 0.145, 0.5065};
+	err = 0;
+ 	for(int i = 0; i < 3; ++i)
+	{
+		if(nn->tail->output->matrix[i] > exp_predict1[i] + 0.001 ||
+	       	   nn->tail->output->matrix[i] < exp_predict1[i] - 0.001)
+		{
+                	printf("-Funkcja zle wypelnila %i komorke macierzy\n", i);
+			printf("--powinno byc %lf a jest %lf\n",
+			exp_predict1[i], nn->tail->output->matrix[i]);
+			++err;
+		}
+	}
+	if(err) {
+		printf("---Funkcja zapelnila nieprawidlowo %i komorek macierzy\n", err);
+		return 1;
+	}
+	puts("=== OK! ===");
+
 	
 //=== zwalnianie pamieci przydzielonej na macierzy ===
 
