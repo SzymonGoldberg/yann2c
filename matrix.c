@@ -241,6 +241,31 @@ matrix_array_append(struct matrix_array * array, unsigned x, unsigned y)
 	return 0;
 }
 
+int
+matrix_array_append_front(struct matrix_array * array, unsigned x, unsigned y)
+{
+//sprawdzam dane wejsciowe
+	if(array == NULL) return 1;
+	if(!x || !y) return 1;
+
+//alokuje pamiec na nowy element listy
+	struct matrix_node *node = matrix_node_create(x, y);
+	if(node == NULL) return 1;
+
+
+//ustawiam odpowiednio zmienne w nowym elemencie
+	if(array->tail == NULL) array->tail = node;
+	if(array->head == NULL) array->head = node;
+	else
+	{
+		array->head->prev = node;
+		node->next = array->head;
+		array->head = node;
+	}
+ 	
+	return 0;
+}
+
 
 void
 matrix_array_free(struct matrix_array *array)
@@ -275,7 +300,7 @@ matrix_array_display(const struct matrix_array* array)
 		matrix_display(*ptr->matrix);
 		if(ptr == array->head) printf("(HEAD)\n");
 		if(ptr == array->tail) printf("(TAIL)\n");
-                if(ptr != NULL) printf("|\n|\nV\n");
+		else printf("|\n|\nV\n");
 		ptr = ptr->next;
 	}
 }

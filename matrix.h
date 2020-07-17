@@ -64,9 +64,14 @@ int outer_product(const matrix_t a, const matrix_t b, matrix_t *result);
 
 
 //zwykly append listy, dodaje nowy element z macierza o wielkosci <x,y>
-//w przypadku sukcesu 0, w przypadku porazki 1
+//na koniec listy (tail) w przypadku sukcesu 0, w przypadku porazki 1
 int
 matrix_array_append(struct matrix_array * array, unsigned x, unsigned y);
+
+//zwykly append listy, dodaje nowy element z macierza o wielkosci <x,y>
+//na poczatek listy (head) w przypadku sukcesu 0, w przypadku porazki 1
+int
+matrix_array_append_front(struct matrix_array * array, unsigned x, unsigned y);
 
 //zwalnia pamiec przydzielona na pojedynczy element listy macierzy
 void

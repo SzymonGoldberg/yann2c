@@ -331,6 +331,7 @@ int main (void)
 	matrix_free(c);
 	matrix_free(d);
 	matrix_free(e);
+	matrix_free(input0);
 
 	puts("TEST 18 ---outer_product---");
 
@@ -384,14 +385,15 @@ int main (void)
 
 	nn_predict(nn, a);
 
-	nn_display(nn);
+//	nn_display(nn);
 
 	b = matrix_alloc(1, 1);
 	matrix_fill(b, 1, 0.1);
 
-	nn_backpropagation(nn, b);
+	nn_backpropagation(nn, a, b, 0.01);
 
 	matrix_free(a);
+	matrix_free(b);
 
 
 //=== zwalnianie pamieci przydzielonej na sieci ===

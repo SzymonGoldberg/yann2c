@@ -24,8 +24,6 @@ matrix_t * neural_network(const matrix_t weights, const matrix_t input);
 //zwraca odpowiedz sieci neuronowej - w przypadku porazki NULL,
 //dane do niej podajemy w formie listy dwukierunkowej z macierzami (network)
 //wejscie podajemy jako pojedyncza macierz
-//TODO
-//>optymalizacja
 matrix_t *
 deep_neural_network(matrix_t input, struct matrix_array network);
 
@@ -53,6 +51,10 @@ int nn_predict(struct nn_array *nn, const matrix_t *input);
 //wyswietlanie <nn> w formie macierzy wag i ostatnich odpowiedzi
 void nn_display(const struct nn_array *nn);
 
-int nn_backpropagation(struct nn_array *nn, const matrix_t *expected_output);
+//na podstawie <expected_output> modyfikuje wagi poszczegolnych warstw
+//neuronow w sieci <nn> <input> - macierz wejsciowa,
+//w przypadku sukcesu 0, w innym wypadku 1
+int nn_backpropagation(struct nn_array *nn, const matrix_t * input,
+	const matrix_t* expected_output, double a);
 
 #endif

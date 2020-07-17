@@ -175,17 +175,92 @@ nn_predict(struct nn_array *nn, const matrix_t *input)
 
 
 int
-nn_backpropagation(struct nn_array *nn, const matrix_t *expected_output)
+nn_backpropagation(struct nn_array *nn, const matrix_t * input,
+	const matrix_t* expected_output, double a)
 {
 //sprawdzanie danych wejsciowych
 	if(nn ==NULL || expected_output == NULL) return 1;
 	if(nn->tail->output->x != expected_output->x) return 1;
-//obliczanie delty wyjscia
-	matrix_t *delta = matrix_alloc(expected_output->x, 1);
-	if(matrix_substraction(*(nn->tail->output), *expected_output, delta)) return 1;
 
-	matrix_display(*delta);
+	struct matrix_array * delta_array = matrix_array_create();
+	struct nn_layer *nn_ptr = nn->tail;
 
+//obliczanie delty dla poszczegolnych warstw
+	do
+	{
+		if(nn_ptr == nn->tail)
+		{
+			if(matrix_array_append_front(delta_array, expected_output->x, 1))
+                        	return 1;
+			//last_layer_delta = layer_output - expeced_output
+			if(matrix_substraction(*(nn_ptr->output), *expected_output,
+				delta_array->head->matrix))
+			{
+					matrix_array_free(delta_array);
+					return 1;
+			}
+		}
+		else
+		{
+                 	if(matrix_array_append_front(delta_array,
+				delta_array->head->matrix->y, nn_ptr->output->x))
+			{
+					matrix_array_free(delta_array);
+					return 1;
+			}
+			//layer_delta = next_layer_delta * next_layer_output
+			if(matrix_multiply(*(delta_array->head->next->matrix),
+				*(nn_ptr->next->weights), delta_array->head->matrix, 0))
+			{
+					matrix_array_free(delta_array);
+					return 1;
+			}
+
+		}
+		nn_ptr = nn_ptr->prev;
+	} while(nn_ptr != NULL);
+
+	nn_ptr = nn->tail;
+	struct matrix_node *delta_ptr = delta_array->tail;
+
+	while(TRUE)
+	{
+		//obliczanie delty wag dla poszczegolnych warstw
+		if(nn_ptr == nn->head)
+		{
+			//layer_weight_delta = input * layer_delta
+			if(matrix_multiply(*input, *(delta_ptr->matrix),
+					delta_ptr->matrix,0))
+			{
+					matrix_array_free(delta_array);
+					return 1;
+			}
+			break;
+		}
+		else
+		{
+			//layer_weight_delta = prev_layer_output * layer_delta
+			if(matrix_multiply(*(nn_ptr->prev->output),
+					*(delta_ptr->matrix),
+					delta_ptr->matrix,0))
+			{
+					matrix_array_free(delta_array);
+					return 1;
+			}
+		}
+
+		//alpha * weight_delta
+      		matrix_multiply_by_num(delta_ptr->matrix, a);
+
+		//layer_weights = layer_weights - alpha * weight_delta
+		matrix_substraction(*nn_ptr->weights, *delta_ptr->matrix, nn_ptr->weights);
+
+
+		nn_ptr = nn_ptr->prev;
+		delta_ptr = delta_ptr->prev;
+	}
+
+	matrix_array_free(delta_array);
 	return 0;
 }
 
