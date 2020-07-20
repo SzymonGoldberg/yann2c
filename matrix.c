@@ -114,6 +114,26 @@ matrix_multiply(const matrix_t a, const matrix_t b, matrix_t *result,
 	return 0;
 }
 
+int
+matrix_hadamard_product(const matrix_t *a, char a_flag, const matrix_t *b,
+	char b_flag, matrix_t *result)
+{
+	if(a == NULL || b == NULL || result == NULL) return 1;
+
+	if(a->x != b->x || a->x != result->x) return 1;
+	if(a->y != b->y || a->y != result->y) return 1;
+
+	for(unsigned x = 0; x < result->x; ++x)
+	{
+		for(unsigned y = 0; y < a->y; ++y)
+		{
+			result->matrix[x + y * a->x] =
+				a->matrix[x + y * a->x] * b->matrix[x + y * b->x];
+		}
+	}
+
+	return 0;
+}
 
 void
 matrix_fill_rng(matrix_t * a, double min, double max)

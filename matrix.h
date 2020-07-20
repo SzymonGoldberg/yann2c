@@ -43,6 +43,20 @@ int matrix_fill(matrix_t *a, unsigned int N, ...);
 int matrix_multiply(const matrix_t a, const matrix_t b,
 			matrix_t *result, char transposed);
 
+
+
+
+//TODO
+//>skonczyc xd
+//>dopisac unit testy
+//>OPIS
+//>dodac opcje do flag (relu i pochodna relu)
+
+
+int
+matrix_hadamard_product(const matrix_t *a, char a_flag, const matrix_t *b,
+	char b_flag, matrix_t *result);
+
 //wypelnianie macierzy randomowymi wartosciami mieszczacymi sie w przedziale
 //min < x < max
 void
