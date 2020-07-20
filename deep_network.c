@@ -163,14 +163,13 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	//obliczanie delty wag dla poszczegolnych warstw
 		if(nn_ptr == nn->head) {
 			//layer_weight_delta = input * layer_delta
-			aux = matrix_multiply(*input, *(delta_ptr->matrix),
-					delta_ptr->matrix,0);
+			aux = outer_product(*input, *(delta_ptr->matrix), delta_ptr->matrix);
 		}
 		else {
 			//layer_weight_delta = prev_layer_output * layer_delta
-			aux = matrix_multiply(*(nn_ptr->prev->output),
+			aux = outer_product(*(nn_ptr->prev->output),
 					*(delta_ptr->matrix),
-					delta_ptr->matrix,0);
+					delta_ptr->matrix);
 		}
 		if(aux) { matrix_array_free(delta_array); return 1; }
 
