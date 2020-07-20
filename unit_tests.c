@@ -385,17 +385,34 @@ int main (void)
 
 	nn_predict(nn, a);
 
-
 	b = matrix_alloc(1, 1);
 	matrix_fill(b, 1, 0.1);
 
-	nn_backpropagation(nn, a, b, 0.01);
+	aux = nn_backpropagation(nn, a, b, 0.01);
+	
+	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
 
-	nn_display(nn);
+	double exp_weights0[] = {0.2986825, 0.0960475};
+	struct nn_layer *nn_ptr = nn->tail;
+
+	err = 0;
+	for(int i = 0; nn_ptr != NULL; ++i)
+	{
+		if( nn_ptr->weights->matrix[0] > exp_weights0[i] + 0.001 ||
+			nn_ptr->weights->matrix[0] < exp_weights0[i] - 0.001)
+		{
+			printf("--powinno byc");
+			printf("%lf a jest %lf\n",exp_weights0[i],
+				nn_ptr->weights->matrix[0]);
+			err++;
+		}
+		nn_ptr = nn_ptr->prev;
+	}
+	if(err) printf("---funkcja zle obliczyla %i wag\n", err);
+	else	printf("=== OK! ===\n");
 
 	matrix_free(a);
 	matrix_free(b);
-
 
 //=== zwalnianie pamieci przydzielonej na sieci ===
 

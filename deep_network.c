@@ -21,15 +21,10 @@ nn_layer_create(unsigned x, unsigned y)
 {
 	struct nn_layer *a = (struct nn_layer *)
 					calloc(1, sizeof(struct nn_layer));
-
 	if(a == NULL) return NULL;
 
 	a->weights = matrix_alloc(x, y);
-	if(a->weights == NULL)
-	{
-		free(a);
-		return NULL;
-	}
+	if(a->weights == NULL) { free(a); return NULL; }
 
 	a->output = matrix_alloc(y, 1);
 	if(a->weights == NULL)
@@ -57,7 +52,6 @@ nn_add_layer(struct nn_array *nn, unsigned size, unsigned input)
 	{
  		new_layer = nn_layer_create(input, size);
 		if(new_layer == NULL) return 1;
-		nn->tail = new_layer;
 		nn->head = new_layer;
 	}
 	else
@@ -66,9 +60,8 @@ nn_add_layer(struct nn_array *nn, unsigned size, unsigned input)
 		if(new_layer == NULL) return 1;
 		nn->tail->next = new_layer;
 		new_layer->prev = nn->tail;
-		nn->tail = new_layer;
-
 	}
+	nn->tail = new_layer;
 
 	return 0;
 }
@@ -104,15 +97,11 @@ nn_predict(struct nn_array *nn, const matrix_t *input)
 	if(input->x != nn->head->weights->x) return 1;
 
 	struct nn_layer *ptr = nn->head;
-//zmienna pomocnicza - jest tutaj po to by przemnozyc tylko raz przez wejscie
-//pozostale mnozenia wykonywac na poprzednich wyjsciach neuronow
-	int i = 0;
 	do {
- 		if(!i) {
+ 		if(ptr == nn->head) {
 			matrix_multiply( *input,
 					*(ptr->weights),
 					ptr->output, 1);
-			i++;
 		}
 		else {
                  	matrix_multiply(*(ptr->prev->output),
@@ -134,19 +123,20 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	if(nn ==NULL || expected_output == NULL) return 1;
 	if(nn->tail->output->x != expected_output->x) return 1;
 
+	if(nn_predict(nn, input)) return 1;
+
 //zmienne pomocniczne
 	struct matrix_array * delta_array = matrix_array_create();//tablica delt
 	struct nn_layer *nn_ptr = nn->tail;//wskaznik na pojedyncza warstwe neuronow
 	int aux = 0;//zmienna pomocnicza z wartosciami jakie zwracaja funkcje w petli
-
 
 //obliczanie delty dla poszczegolnych warstw
 	do {
 		if(nn_ptr == nn->tail)
 		{
 			aux=matrix_array_append_front(delta_array, expected_output->x, 1);
-			if(!aux) {
 			//last_layer_delta = layer_output - expeced_output
+			if(!aux) {
 				aux = matrix_substraction(*(nn_ptr->output),
 					*expected_output, delta_array->head->matrix);
 			}
@@ -169,37 +159,32 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	nn_ptr = nn->tail;
 	struct matrix_node *delta_ptr = delta_array->tail;//wskaznik na poj. delte
 
-//obliczanie delty wag dla poszczegolnych warstw
-	while(TRUE)
-	{
-		if(nn_ptr == nn->head)
-		{
+	do {
+	//obliczanie delty wag dla poszczegolnych warstw
+		if(nn_ptr == nn->head) {
 			//layer_weight_delta = input * layer_delta
 			aux = matrix_multiply(*input, *(delta_ptr->matrix),
 					delta_ptr->matrix,0);
-			break;
 		}
-		else
-		{
+		else {
 			//layer_weight_delta = prev_layer_output * layer_delta
 			aux = matrix_multiply(*(nn_ptr->prev->output),
 					*(delta_ptr->matrix),
 					delta_ptr->matrix,0);
 		}
-		
+		if(aux) { matrix_array_free(delta_array); return 1; }
 
-		if(aux) break;
-		//alpha * weight_delta
+	//alpha * weight_delta
       		matrix_multiply_by_num(delta_ptr->matrix, a);
 
-		//layer_weights = layer_weights - alpha * weight_delta
-		aux = matrix_substraction(*nn_ptr->weights, *delta_ptr->matrix,
+	//zmiana wartosci wag o delte wagi * alpha
+		matrix_substraction(*nn_ptr->weights, *delta_ptr->matrix,
 			nn_ptr->weights);
 
 		nn_ptr = nn_ptr->prev;
 		delta_ptr = delta_ptr->prev;
 	}
-	if(aux) { matrix_array_free(delta_array); return 1; }
+	while(nn_ptr != NULL);
 
 	matrix_array_free(delta_array);
 	return 0;

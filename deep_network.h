@@ -23,9 +23,8 @@ struct nn_array * nn_create(void);
 struct nn_layer * nn_layer_create(unsigned x, unsigned y);
 
 //funkcja dodaje siec <size> neuronow na koniec struktury <nn> (tail)
-//jesli struktura byla pusta to pierwsza macierz ma wymiary <input>, <size>
-//w przypadku istniejacych juz wczesniej warstw
-//funkcja ma rozmiar wyjscie poprzedniej warstwy, <size>
+//jesli struktura byla pusta to pierwsza macierz ma wymiary - (<input>, <size>)
+//w przypadku istniejacych juz wczesniej warstw - (wyjscie poprzedniej warstwy, <size>)
 //zwraca 0 w przypadku porazki, w innym przypadku 1
 int nn_add_layer(struct nn_array *nn, unsigned size, unsigned input);
 
@@ -41,7 +40,7 @@ int nn_predict(struct nn_array *nn, const matrix_t *input);
 void nn_display(const struct nn_array *nn);
 
 //na podstawie <expected_output> modyfikuje wagi poszczegolnych warstw
-//neuronow w sieci <nn> <input> - macierz wejsciowa,
+//neuronow w sieci <nn>; <input> - macierz wejsciowa, <a> - wspolczynnik uczenia alpha
 //w przypadku sukcesu 0, w innym wypadku 1
 int nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	const matrix_t* expected_output, double a);
