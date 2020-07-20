@@ -385,12 +385,13 @@ int main (void)
 
 	nn_predict(nn, a);
 
-//	nn_display(nn);
 
 	b = matrix_alloc(1, 1);
 	matrix_fill(b, 1, 0.1);
 
 	nn_backpropagation(nn, a, b, 0.01);
+
+	nn_display(nn);
 
 	matrix_free(a);
 	matrix_free(b);
