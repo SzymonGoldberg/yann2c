@@ -118,22 +118,43 @@ int
 matrix_hadamard_product(const matrix_t *a, char a_flag, const matrix_t *b,
 	char b_flag, matrix_t *result)
 {
-	if(a == NULL || b == NULL || result == NULL) return 1;
+//walidacja danych
+	if(result == NULL) return 1;
 
-	if(a->x != b->x || a->x != result->x) return 1;
-	if(a->y != b->y || a->y != result->y) return 1;
+//sprawdzam czy mozna obie macierze mnozyc
+	if(a->x != b->x || a->y != b->y) return 2;
 
-	for(unsigned x = 0; x < result->x; ++x)
+//sprawdzam miejsce w macierzy wynikowej
+	if(result->x != b->x || result->y != b->y) return 2;
+
+//mnozenie macierzy
+	double a_value, b_value;
+	for(unsigned y = 0; y < (*result).y; ++y)
 	{
-		for(unsigned y = 0; y < a->y; ++y)
+		for(unsigned x = 0; x < (*result).x; ++x)
 		{
-			result->matrix[x + y * a->x] =
-				a->matrix[x + y * a->x] * b->matrix[x + y * b->x];
+			switch(a_flag)
+			{
+				case 1: a_value = MAX(a->matrix[x + y * a->x], 0.0);
+					break;
+				case 2: a_value = RELU_DERIV(a->matrix[x + y * a->x]);
+					break;
+				default:a_value = a->matrix[x + y * a->x];
+			}
+			switch(b_flag)
+			{
+				case 1: b_value = MAX(b->matrix[x + y * a->x], 0.0);
+					break;
+				case 2: b_value = RELU_DERIV(b->matrix[x + y * a->x]);
+					break;
+				default:b_value = b->matrix[x + y * a->x];
+			}
+			result->matrix[x + y * a->x] = a_value * b_value;
 		}
 	}
-
 	return 0;
 }
+
 
 void
 matrix_fill_rng(matrix_t * a, double min, double max)

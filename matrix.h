@@ -4,6 +4,11 @@
 #define TRUE 1
 #define FALSE 0
 
+
+#define MAX(a, b) ((a) < (b) ? (b) : (a))
+#define RELU_DERIV(a) ((a) <= (0.0) ? (0.0) : (1.0))
+
+
 //typ opisujacy pojedyncza, prosta macierz
 typedef struct
 {
