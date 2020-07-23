@@ -123,6 +123,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	if(nn ==NULL || expected_output == NULL) return 1;
 	if(nn->tail->output->x != expected_output->x) return 1;
 
+//nn_predict
 	if(nn_predict(nn, input)) return 1;
 
 //zmienne pomocniczne

@@ -422,7 +422,7 @@ int main (void)
 	b = matrix_alloc(2, 1);
 	c = matrix_alloc(3, 1);
 
-        aux = matrix_hadamard_product(a, 0, b, 0, c);
+        aux = matrix_hadamard_product(a, b, c);
 
 	if(!aux) puts("---Funkcja powinna zwrocic 1 a zwrocila 0");
 	else	puts("=== OK! ===");
@@ -437,7 +437,7 @@ int main (void)
 	matrix_fill(a, 3, 1.0, 2.0, 3.0);
 	matrix_fill(b, 3, 5.0, 5.0, 5.0);
 
-	aux = matrix_hadamard_product(a, 0, b, 0, c);
+	aux = matrix_hadamard_product(a, b, c);
 	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
 
 	double exp_multiply3[] = {5.0, 10.0, 15.0};
@@ -459,58 +459,6 @@ int main (void)
 		return 1;
 	}
 	puts("=== OK! ===");
-
-
-	puts("TEST 22 ---matrix_hadamard_product---(pochodna relu)");
-
-	aux = matrix_hadamard_product(a, 2, b, 0, c);
-	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
-
-	double exp_multiply4[] = {5.0, 5.0, 5.0};
-
-	err = 0;
- 	for(int i = 0; i < 3; ++i)
-	{
-		if(	c->matrix[i] > exp_multiply4[i] + 0.001 ||
-	       		c->matrix[i] < exp_multiply4[i] - 0.001)
-		{
-                	printf("-Funkcja zle wypelnila %i komorke macierzy\n", i);
-			printf("--powinno byc %lf a jest %lf\n",
-				exp_multiply4[i], c->matrix[i]);
-			++err;
-		}
-	}
-	if(err) {
-		printf("---Funkcja zapelnila nieprawidlowo %i komorek macierzy\n", err);
-		return 1;
-	}
-	puts("=== OK! ===");
-
-	puts("TEST 22 ---matrix_hadamard_product---(pochodna relu)");
-
-	aux = matrix_hadamard_product(a, 0, b, 2, c);
-	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
-
-	double exp_multiply5[] = {1.0, 2.0, 3.0};
-
-	err = 0;
- 	for(int i = 0; i < 3; ++i)
-	{
-		if(	c->matrix[i] > exp_multiply5[i] + 0.001 ||
-	       		c->matrix[i] < exp_multiply5[i] - 0.001)
-		{
-                	printf("-Funkcja zle wypelnila %i komorke macierzy\n", i);
-			printf("--powinno byc %lf a jest %lf\n",
-				exp_multiply5[i], c->matrix[i]);
-			++err;
-		}
-	}
-	if(err) {
-		printf("---Funkcja zapelnila nieprawidlowo %i komorek macierzy\n", err);
-		return 1;
-	}
-	puts("=== OK! ===");
-
 
 	matrix_free(a);
 	matrix_free(b);
