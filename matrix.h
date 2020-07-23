@@ -48,11 +48,6 @@ int matrix_fill(matrix_t *a, unsigned int N, ...);
 int matrix_multiply(const matrix_t a, const matrix_t b,
 			matrix_t *result, char transposed);
 
-
-//TODO
-//>skonczyc xd
-//>dopisac unit testy
-
 //mnozenie hadamarda <c> = <a> o <b>
 //mozna dodac flage <a_flag/b_flag> ktora:
 //	> 0 - nie modyfikuje w zaden sposob danych w komorkach macierzy
