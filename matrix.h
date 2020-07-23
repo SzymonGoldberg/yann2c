@@ -49,15 +49,16 @@ int matrix_multiply(const matrix_t a, const matrix_t b,
 			matrix_t *result, char transposed);
 
 
-
-
 //TODO
 //>skonczyc xd
 //>dopisac unit testy
-//>OPIS
-//>dodac opcje do flag (relu i pochodna relu)
 
-
+//mnozenie hadamarda <c> = <a> o <b>
+//mozna dodac flage <a_flag/b_flag> ktora:
+//	> 0 - nie modyfikuje w zaden sposob danych w komorkach macierzy
+//	> 1 - podaje liczby z komorek macierzy do funkcji relu
+//	> 2 - podaje liczby z komorek macierz do pochodnej relu
+//w przypadku sukcesu zwraca 0 w innym wypadku 1
 int
 matrix_hadamard_product(const matrix_t *a, char a_flag, const matrix_t *b,
 	char b_flag, matrix_t *result);

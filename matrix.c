@@ -119,7 +119,7 @@ matrix_hadamard_product(const matrix_t *a, char a_flag, const matrix_t *b,
 	char b_flag, matrix_t *result)
 {
 //walidacja danych
-	if(result == NULL) return 1;
+	if(a == NULL || b == NULL  || result == NULL) return 1;
 
 //sprawdzam czy mozna obie macierze mnozyc
 	if(a->x != b->x || a->y != b->y) return 2;

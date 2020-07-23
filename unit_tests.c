@@ -367,8 +367,8 @@ int main (void)
 	matrix_free(a);
 	matrix_free(b);
 	matrix_free(c);
-
 	nn_free(nn);
+
 
 	puts("TEST 19 ---nn_backpropagation---");
 
@@ -414,7 +414,107 @@ int main (void)
 	matrix_free(a);
 	matrix_free(b);
 
-//=== zwalnianie pamieci przydzielonej na sieci ===
+
+	puts("TEST 20 ---matrix_hadamard_product---");
+
+
+	a = matrix_alloc(3, 1);
+	b = matrix_alloc(2, 1);
+	c = matrix_alloc(3, 1);
+
+        aux = matrix_hadamard_product(a, 0, b, 0, c);
+
+	if(!aux) puts("---Funkcja powinna zwrocic 1 a zwrocila 0");
+	else	puts("=== OK! ===");
+	
+	matrix_free(b);
+
+
+	puts("TEST 21 ---matrix_hadamard_product---");
+
+	b = matrix_alloc(3, 1);
+
+	matrix_fill(a, 3, 1.0, 2.0, 3.0);
+	matrix_fill(b, 3, 5.0, 5.0, 5.0);
+
+	aux = matrix_hadamard_product(a, 0, b, 0, c);
+	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
+
+	double exp_multiply3[] = {5.0, 10.0, 15.0};
+
+	err = 0;
+ 	for(int i = 0; i < 3; ++i)
+	{
+		if(	c->matrix[i] > exp_multiply3[i] + 0.001 ||
+	       		c->matrix[i] < exp_multiply3[i] - 0.001)
+		{
+                	printf("-Funkcja zle wypelnila %i komorke macierzy\n", i);
+			printf("--powinno byc %lf a jest %lf\n",
+				exp_multiply3[i], c->matrix[i]);
+			++err;
+		}
+	}
+	if(err) {
+		printf("---Funkcja zapelnila nieprawidlowo %i komorek macierzy\n", err);
+		return 1;
+	}
+	puts("=== OK! ===");
+
+
+	puts("TEST 22 ---matrix_hadamard_product---(pochodna relu)");
+
+	aux = matrix_hadamard_product(a, 2, b, 0, c);
+	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
+
+	double exp_multiply4[] = {5.0, 5.0, 5.0};
+
+	err = 0;
+ 	for(int i = 0; i < 3; ++i)
+	{
+		if(	c->matrix[i] > exp_multiply4[i] + 0.001 ||
+	       		c->matrix[i] < exp_multiply4[i] - 0.001)
+		{
+                	printf("-Funkcja zle wypelnila %i komorke macierzy\n", i);
+			printf("--powinno byc %lf a jest %lf\n",
+				exp_multiply4[i], c->matrix[i]);
+			++err;
+		}
+	}
+	if(err) {
+		printf("---Funkcja zapelnila nieprawidlowo %i komorek macierzy\n", err);
+		return 1;
+	}
+	puts("=== OK! ===");
+
+	puts("TEST 22 ---matrix_hadamard_product---(pochodna relu)");
+
+	aux = matrix_hadamard_product(a, 0, b, 2, c);
+	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
+
+	double exp_multiply5[] = {1.0, 2.0, 3.0};
+
+	err = 0;
+ 	for(int i = 0; i < 3; ++i)
+	{
+		if(	c->matrix[i] > exp_multiply5[i] + 0.001 ||
+	       		c->matrix[i] < exp_multiply5[i] - 0.001)
+		{
+                	printf("-Funkcja zle wypelnila %i komorke macierzy\n", i);
+			printf("--powinno byc %lf a jest %lf\n",
+				exp_multiply5[i], c->matrix[i]);
+			++err;
+		}
+	}
+	if(err) {
+		printf("---Funkcja zapelnila nieprawidlowo %i komorek macierzy\n", err);
+		return 1;
+	}
+	puts("=== OK! ===");
+
+
+	matrix_free(a);
+	matrix_free(b);
+	matrix_free(c);
 
 	nn_free(nn);
 
