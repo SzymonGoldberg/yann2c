@@ -237,27 +237,27 @@ int main (void)
 
 	puts("TEST 12 ---nn_add_layer---");
 
-	aux = nn_add_layer(NULL, 3, 3);
+	aux = nn_add_layer(NULL, 3, 3, NULL);
 	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
 	else puts("=== OK! ===");
 
 
 	puts("TEST 13 ---nn_add_layer---");
 
-	aux = nn_add_layer(nn, 0, 3);
+	aux = nn_add_layer(nn, 0, 3, NULL);
 	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
 	else puts("=== OK! ===");
 
 	puts("TEST 14 ---nn_add_layer---");
 
-	aux = nn_add_layer(nn, 3, 0);
+	aux = nn_add_layer(nn, 3, 0, NULL);
 	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
 	else puts("=== OK! ===");
 
 
 	puts("TEST 15 ---nn_add_layer---");
 
-	aux = nn_add_layer(nn, 3, 3);
+	aux = nn_add_layer(nn, 3, 3, NULL);
 	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
 	else puts("=== OK! ===");
 
@@ -297,7 +297,7 @@ int main (void)
 	matrix_fill(nn->tail->weights, 9,	0.1, 0.2,-0.1,
 					       -0.1, 0.1, 0.9,
 				       		0.1, 0.4, 0.1);
-	aux = nn_add_layer(nn, 3, 3);
+	aux = nn_add_layer(nn, 3, 3, NULL);
 
 	matrix_fill(nn->tail->weights, 9,	0.3, 1.1,-0.3,
 					      	0.1, 0.2, 0.0,
@@ -374,10 +374,10 @@ int main (void)
 
 	nn = nn_create();
 
-	nn_add_layer(nn, 1, 1);
+	nn_add_layer(nn, 1, 1, NULL);
 	matrix_fill(nn->tail->weights, 1, 0.1);
 
-	nn_add_layer(nn, 1, 1);
+	nn_add_layer(nn, 1, 1, NULL);
 	matrix_fill(nn->tail->weights, 1, 0.3);
 
 	a = matrix_alloc(1, 1);
@@ -422,7 +422,7 @@ int main (void)
 	b = matrix_alloc(2, 1);
 	c = matrix_alloc(3, 1);
 
-        aux = matrix_hadamard_product(a, b, c);
+        aux = matrix_hadamard_product(*a, *b, c);
 
 	if(!aux) puts("---Funkcja powinna zwrocic 1 a zwrocila 0");
 	else	puts("=== OK! ===");
@@ -437,7 +437,7 @@ int main (void)
 	matrix_fill(a, 3, 1.0, 2.0, 3.0);
 	matrix_fill(b, 3, 5.0, 5.0, 5.0);
 
-	aux = matrix_hadamard_product(a, b, c);
+	aux = matrix_hadamard_product(*a, *b, c);
 	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
 
 	double exp_multiply3[] = {5.0, 10.0, 15.0};
@@ -463,7 +463,6 @@ int main (void)
 	matrix_free(a);
 	matrix_free(b);
 	matrix_free(c);
-
 	nn_free(nn);
 
 	return 0;

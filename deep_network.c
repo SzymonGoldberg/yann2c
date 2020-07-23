@@ -40,7 +40,8 @@ nn_layer_create(unsigned x, unsigned y)
 
 
 int
-nn_add_layer(struct nn_array *nn, unsigned size, unsigned input)
+nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
+	int (*activation_func)(matrix_t *, unsigned))
 {
 //sprawdzam dane wejsciowe
 	if(nn == NULL) return 1;
@@ -62,6 +63,7 @@ nn_add_layer(struct nn_array *nn, unsigned size, unsigned input)
 		new_layer->prev = nn->tail;
 	}
 	nn->tail = new_layer;
+	nn->tail->activation_func = activation_func;
 
 	return 0;
 }
@@ -92,6 +94,7 @@ nn_free(struct nn_array *nn)
 int
 nn_predict(struct nn_array *nn, const matrix_t *input)
 {
+//walidacja danych wejsciowych
  	if(nn == NULL) return 1;
 	if(input == NULL) return 1;
 	if(input->x != nn->head->weights->x) return 1;
@@ -108,6 +111,11 @@ nn_predict(struct nn_array *nn, const matrix_t *input)
 					*(ptr->weights),
 					ptr->output, 1);
 		}
+
+	//stosuje funkcje aktywacji na wyjsciu danej warstwy (jesli jakas funkcja jest)
+		if(ptr->activation_func != NULL)
+			(ptr->activation_func)(ptr->output, 0);
+
 		ptr = ptr->next;
 	} while(ptr != NULL);
 
