@@ -3,8 +3,7 @@
 #include "matrix.h"
 #include "deep_network.h"
 
-
-//======= FUNKCJE OBSLUGUJE STRUKTURY DANYCH SIECI =======
+//======= FUNKCJE OBSLUGUJACE STRUKTURY DANYCH SIECI =======
 
 struct nn_array *
 nn_create(void)
@@ -41,16 +40,17 @@ nn_layer_create(unsigned x, unsigned y)
 
 int
 nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
-	int (*activation_func)(matrix_t *, unsigned))
+	int (*activation_func)(double *, unsigned))
 {
 //sprawdzam dane wejsciowe
 	if(nn == NULL) return 1;
-	if(!input || !size) return 1;
+	if(!size) return 1;
 
 //alokuje pamiec
   	struct nn_layer *new_layer;
 	if(nn->tail == NULL)
 	{
+		if(!input) return 1;
  		new_layer = nn_layer_create(input, size);
 		if(new_layer == NULL) return 1;
 		nn->head = new_layer;
@@ -114,7 +114,13 @@ nn_predict(struct nn_array *nn, const matrix_t *input)
 
 	//stosuje funkcje aktywacji na wyjsciu danej warstwy (jesli jakas funkcja jest)
 		if(ptr->activation_func != NULL)
-			(ptr->activation_func)(ptr->output, 0);
+		{
+			for(unsigned i = 0; i < (ptr->output->x) * (ptr->output->y); ++i)
+			{
+				(ptr->activation_func)(&(ptr->output->matrix[i]), 0);
+			}
+		}
+
 
 		ptr = ptr->next;
 	} while(ptr != NULL);
@@ -122,16 +128,19 @@ nn_predict(struct nn_array *nn, const matrix_t *input)
 	return 0;
 }
 
-//TODO
-//>opisac jesli to gowno dziala
+//<delta> = <delta> o (funkcja aktywacji)<layer->output>
 int
-nn_hadamard(struct nn_layer *layer, matrix_t *delta, matrix_t output)
+nn_hadamard(struct nn_layer *layer, matrix_t *delta)
 {
 	if(layer == NULL || delta == NULL) return 1;
-	if(layer->activation_func != NULL)
+	if(layer->activation_func == NULL) return 1;
+
+	double a;
+	for(unsigned i = 0; i < (delta->y) * (delta->x); ++i)
 	{
-		(layer->activation_func)(&output, 1);
-		if(matrix_hadamard_product(*delta, output, delta)) return 1;
+		a = layer->output->matrix[i];
+		(layer->activation_func)(&a, 1);
+		delta->matrix[i] = delta->matrix[i] * a;
 	}
 	return 0;
 }
@@ -147,7 +156,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 
 //nn_predict
 	if(nn_predict(nn, input)) return 1;
-
+	
 //zmienne pomocniczne
 	struct matrix_array * delta_array = matrix_array_create();//tablica delt
 	struct nn_layer *nn_ptr = nn->tail;//wskaznik na pojedyncza warstwe neuronow
@@ -164,8 +173,8 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 		}
 		else
 		{
-                 	matrix_array_append_front(delta_array,
-				delta_array->head->matrix->y, nn_ptr->output->x);
+                 	matrix_array_append_front(delta_array, nn_ptr->output->x,
+				delta_array->head->matrix->y);
 
 			//layer_delta = next_layer_delta * next_layer_output
 			matrix_multiply(*(delta_array->head->next->matrix),
@@ -175,7 +184,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 
 		//layer_delta = layer_delta o RELU_DERIV(layer_output)
 		if(nn_ptr->activation_func != NULL)
-		nn_hadamard(nn_ptr, delta_array->head->matrix, *(nn_ptr->output));
+        		nn_hadamard(nn_ptr, delta_array->head->matrix);
 
 		nn_ptr = nn_ptr->prev;
 	} while(nn_ptr != NULL);
@@ -183,26 +192,31 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	nn_ptr = nn->tail;
 	struct matrix_node *delta_ptr = delta_array->tail;//wskaznik na poj. delte
 
+	matrix_t *mtrx;
 	do {
 	//obliczanie delty wag dla poszczegolnych warstw
 		if(nn_ptr == nn->head) {
-			//layer_weight_delta = input * layer_delta
-			outer_product(*input, *(delta_ptr->matrix), delta_ptr->matrix);
+			mtrx = matrix_alloc(input->x, delta_ptr->matrix->x);
+			
+			//layer_weight_delta = layer_delta o input 
+			outer_product(*(delta_ptr->matrix), *input, mtrx);
+
 		}
 		else {
-			//layer_weight_delta = prev_layer_output * layer_delta
-			outer_product(*(nn_ptr->prev->output),
-					*(delta_ptr->matrix),
-					delta_ptr->matrix);
+			mtrx = matrix_alloc(nn_ptr->prev->output->x,delta_ptr->matrix->x);
+			
+			//layer_weight_delta = layer_delta o prev_layer_output
+			outer_product( *(delta_ptr->matrix),*(nn_ptr->prev->output),
+						mtrx);
 		}
 
 	//alpha * weight_delta
-      		matrix_multiply_by_num(delta_ptr->matrix, a);
+      		matrix_multiply_by_num(mtrx, a);
 
 	//layer_weights = layer_weights - delta_weight * alpha
-		matrix_substraction(*nn_ptr->weights, *delta_ptr->matrix,
-			nn_ptr->weights);
+		matrix_substraction(*nn_ptr->weights, *mtrx, nn_ptr->weights);
 
+		matrix_free(mtrx);
 		nn_ptr = nn_ptr->prev;
 		delta_ptr = delta_ptr->prev;
 	}

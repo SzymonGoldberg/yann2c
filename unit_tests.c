@@ -465,5 +465,28 @@ int main (void)
 	matrix_free(c);
 	nn_free(nn);
 
+	puts("TEST 22 ---nn_backpropagation---(z funkcja aktywacji)");
+
+	nn = nn_create();
+
+	nn_add_layer(nn, 3, 1, (ReLU));
+	matrix_fill(nn->tail->weights, 3, 0.1, -0.1, 0.1);
+
+	nn_add_layer(nn, 1, 0, NULL);
+	matrix_fill(nn->tail->weights, 3, 0.3, 1.1, -0.3);
+
+	a = matrix_alloc(1, 1);
+	a->matrix[0] = 8.5;
+
+	b = matrix_alloc(1, 1);
+	b->matrix[0] = 0.1;
+
+	nn_backpropagation(nn, a, b, 0.01);
+	nn_display(nn);		//DEBUG
+
+	nn_free(nn);
+	matrix_free(a);
+	matrix_free(b);
+
 	return 0;
 }

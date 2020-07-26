@@ -42,7 +42,7 @@ matrix_display(const matrix_t a)
 	for(unsigned int i = 0; i < (a.x * a.y); ++i)
 	{
 		if(i && !(i % a.x)) printf("\n");
-		printf("%.3lf ", a.matrix[i]);
+		printf("%.5lf ", a.matrix[i]);
 	}
 	printf("\n");
 }
@@ -127,10 +127,8 @@ matrix_hadamard_product(matrix_t a, matrix_t b, matrix_t *result)
 	if(result->x != b.x || result->y != b.y) return 2;
 
 //mnozenie macierzy
-	for(unsigned y = 0; y < result->y; ++y)
-		for(unsigned x = 0; x < result->x; ++x)
-			result->matrix[x + y * a.x] =	a.matrix[x + y * a.x]
-							* b.matrix[x + y * a.x];
+	for(unsigned i = 0; i < (result->x) * (result->y); ++i)
+		result->matrix[i] = a.matrix[i] * b.matrix[i];
 	return 0;
 }
 
@@ -222,9 +220,6 @@ matrix_node_create(unsigned x, unsigned y)
 		return NULL;
 	}
 
-//co prawda nie powinno byc z tym problemu bo calloc wszystko zeruje przy
-//alokacji ale dla swietego spokoju ustawiam pozostale zmienne w strukturze
-//z lista
 	result->next = NULL;
 	result->prev = NULL;
 
@@ -242,7 +237,6 @@ matrix_array_append(struct matrix_array * array, unsigned x, unsigned y)
 	struct matrix_node *node = matrix_node_create(x, y);
 	if(node == NULL) return 1;
 
-
 //ustawiam odpowiednio zmienne w nowym elemencie
 	if(array->head == NULL) array->head = node;
 	if(array->tail == NULL) array->tail = node;
@@ -252,7 +246,6 @@ matrix_array_append(struct matrix_array * array, unsigned x, unsigned y)
 		node->prev = array->tail;
 		array->tail = node;
 	}
- 	
 	return 0;
 }
 
@@ -267,7 +260,6 @@ matrix_array_append_front(struct matrix_array * array, unsigned x, unsigned y)
 	struct matrix_node *node = matrix_node_create(x, y);
 	if(node == NULL) return 1;
 
-
 //ustawiam odpowiednio zmienne w nowym elemencie
 	if(array->tail == NULL) array->tail = node;
 	if(array->head == NULL) array->head = node;
@@ -277,7 +269,6 @@ matrix_array_append_front(struct matrix_array * array, unsigned x, unsigned y)
 		node->next = array->head;
 		array->head = node;
 	}
- 	
 	return 0;
 }
 
@@ -306,12 +297,9 @@ matrix_array_free(struct matrix_array *array)
 //======= FUNKCJE AKTYWACJI ==================================
 
 int
-matrix_ReLU(matrix_t *a, unsigned derivative)
+ReLU(double *a, unsigned derivative)
 {
- 	if(a == NULL) return 1;
-	for(unsigned i = 0; i < (a->x) * (a->y); ++i)
-		a->matrix[i] = derivative ?	RELU_DERIV(a->matrix[i]) :
-		       				MAX(a->matrix[i], 0);
+	*a = derivative ? RELU_DERIV(*a) : MAX(*a, 0);
 	return 0;
 }
 

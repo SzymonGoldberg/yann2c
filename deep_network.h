@@ -7,7 +7,7 @@
 struct nn_layer {
  	matrix_t *weights;
  	matrix_t *output;
-	int (*activation_func)(matrix_t *, unsigned);
+	int (*activation_func)(double *, unsigned);
 	struct nn_layer *next;
 	struct nn_layer *prev;
 };
@@ -30,7 +30,7 @@ struct nn_layer * nn_layer_create(unsigned x, unsigned y);
 //zwraca 0 w przypadku porazki, w innym przypadku 1
 int
 nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
-	int (*activation_func)(matrix_t *, unsigned));
+	int (*activation_func)(double *, unsigned));
 
 //zwalnia cala pamiec przydzielona na strukture <nn>
 void nn_free(struct nn_array *nn);

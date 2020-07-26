@@ -90,7 +90,7 @@ struct matrix_array *
 matrix_array_create(void);
 
 int
-matrix_ReLU(matrix_t *a, unsigned derivative);
+ReLU(double *a, unsigned derivative);
 
 void matrix_array_display(const struct matrix_array* array);
 
