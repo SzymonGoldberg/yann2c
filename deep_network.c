@@ -185,7 +185,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	//alpha * weight_delta
       		matrix_multiply_by_num(delta_ptr->matrix, a);
 
-	//zmiana wartosci wag o delte wagi * alpha
+	//layer_weights = layer_weights - delta_weight * alpha
 		matrix_substraction(*nn_ptr->weights, *delta_ptr->matrix,
 			nn_ptr->weights);
 

@@ -115,26 +115,22 @@ matrix_multiply(const matrix_t a, const matrix_t b, matrix_t *result,
 }
 
 int
-matrix_hadamard_product(matrix_t a, matrix_t b, matrix_t *result)
+matrix_hadamard_product(matrix_t *a, matrix_t *b, matrix_t *result)
 {
 //walidacja danych
 	if(result == NULL) return 1;
 
 //sprawdzam czy mozna obie macierze mnozyc
-	if(a.x != b.x || a.y != b.y) return 2;
+	if(a->x != b->x || a->y != b->y) return 2;
 
 //sprawdzam miejsce w macierzy wynikowej
-	if(result->x != b.x || result->y != b.y) return 2;
+	if(result->x != b->x || result->y != b->y) return 2;
 
 //mnozenie macierzy
 	for(unsigned y = 0; y < result->y; ++y)
-	{
 		for(unsigned x = 0; x < result->x; ++x)
-		{
-			result->matrix[x + y * a.x] =	a.matrix[x + y * a.x]
-							* b.matrix[x + y * a.x];
-		}
-	}
+			result->matrix[x + y * a->x] =	a->matrix[x + y * a->x]
+							* b->matrix[x + y * a->x];
 	return 0;
 }
 
@@ -178,8 +174,6 @@ matrix_multiply_by_num(matrix_t *a, const double b)
 	return 0;
 }
 
-//przyjmuje dwie jednowymiarowe macierze (wektory z y = 1) i tworzy z nich
-//nowa macierz, w przypadku sukcesu - 0, porazka - 1
 int
 outer_product(const matrix_t a, const matrix_t b, matrix_t *result)
 {
@@ -187,12 +181,9 @@ outer_product(const matrix_t a, const matrix_t b, matrix_t *result)
 	if(result == NULL) return 1;
 	if(result->x != b.x || result->y != a.x) return 1;
 
-
 	for(unsigned g = 0; g < a.x; ++g)
 		for(unsigned i = 0; i < b.x; ++i)
 			result->matrix[i + b.x * g] =  b.matrix[i] * a.matrix[g];
-
-
 
 	return 0;
 }

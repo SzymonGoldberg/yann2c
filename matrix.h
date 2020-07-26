@@ -48,7 +48,7 @@ int matrix_multiply(const matrix_t a, const matrix_t b,
 
 //mnozenie hadamarda <c> = <a> o <b>
 //w przypadku sukcesu zwraca 0 w innym wypadku 1
-int matrix_hadamard_product(matrix_t a, matrix_t b, matrix_t *result);
+int matrix_hadamard_product(matrix_t *a, matrix_t *b, matrix_t *result);
 
 //wypelnianie macierzy randomowymi wartosciami mieszczacymi sie w przedziale
 //min < x < max
@@ -62,8 +62,8 @@ int matrix_substraction(const matrix_t a, const matrix_t b, matrix_t *result);
 //w przypadku sukcesu zwraca 0, w innym - 1
 int matrix_multiply_by_num(matrix_t *a, const double b);
 
-//przyjmuje dwie jednowymiarowe macierze (wektory z y = 1) i tworzy z nich
-//nowa macierz, w przypadku sukcesu - 0, porazka - 1
+//przyjmuje dwie jednowymiarowe macierze <a>, <b> (wektory z y = 1) i tworzy z nich
+//nowa macierz ktora wpisuje do <result> w przypadku sukcesu - 0, porazka - 1
 int outer_product(const matrix_t a, const matrix_t b, matrix_t *result);
 
 
