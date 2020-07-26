@@ -115,22 +115,22 @@ matrix_multiply(const matrix_t a, const matrix_t b, matrix_t *result,
 }
 
 int
-matrix_hadamard_product(matrix_t *a, matrix_t *b, matrix_t *result)
+matrix_hadamard_product(matrix_t a, matrix_t b, matrix_t *result)
 {
 //walidacja danych
 	if(result == NULL) return 1;
 
 //sprawdzam czy mozna obie macierze mnozyc
-	if(a->x != b->x || a->y != b->y) return 2;
+	if(a.x != b.x || a.y != b.y) return 2;
 
 //sprawdzam miejsce w macierzy wynikowej
-	if(result->x != b->x || result->y != b->y) return 2;
+	if(result->x != b.x || result->y != b.y) return 2;
 
 //mnozenie macierzy
 	for(unsigned y = 0; y < result->y; ++y)
 		for(unsigned x = 0; x < result->x; ++x)
-			result->matrix[x + y * a->x] =	a->matrix[x + y * a->x]
-							* b->matrix[x + y * a->x];
+			result->matrix[x + y * a.x] =	a.matrix[x + y * a.x]
+							* b.matrix[x + y * a.x];
 	return 0;
 }
 

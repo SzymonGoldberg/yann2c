@@ -122,6 +122,20 @@ nn_predict(struct nn_array *nn, const matrix_t *input)
 	return 0;
 }
 
+//TODO
+//>opisac jesli to gowno dziala
+int
+nn_hadamard(struct nn_layer *layer, matrix_t *delta, matrix_t output)
+{
+	if(layer == NULL || delta == NULL) return 1;
+	if(layer->activation_func != NULL)
+	{
+		(layer->activation_func)(&output, 1);
+		if(matrix_hadamard_product(*delta, output, delta)) return 1;
+	}
+	return 0;
+}
+
 
 int
 nn_backpropagation(struct nn_array *nn, const matrix_t * input,
@@ -137,31 +151,32 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 //zmienne pomocniczne
 	struct matrix_array * delta_array = matrix_array_create();//tablica delt
 	struct nn_layer *nn_ptr = nn->tail;//wskaznik na pojedyncza warstwe neuronow
-	int aux = 0;//zmienna pomocnicza z wartosciami jakie zwracaja funkcje w petli
 
 //obliczanie delty dla poszczegolnych warstw
 	do {
 		if(nn_ptr == nn->tail)
 		{
-			aux=matrix_array_append_front(delta_array, expected_output->x, 1);
+			matrix_array_append_front(delta_array, expected_output->x, 1);
+
 			//last_layer_delta = layer_output - expeced_output
-			if(!aux) {
-				aux = matrix_substraction(*(nn_ptr->output),
-					*expected_output, delta_array->head->matrix);
-			}
+			matrix_substraction(*(nn_ptr->output),
+				*expected_output, delta_array->head->matrix);
 		}
 		else
 		{
-                 	aux = matrix_array_append_front(delta_array,
+                 	matrix_array_append_front(delta_array,
 				delta_array->head->matrix->y, nn_ptr->output->x);
+
 			//layer_delta = next_layer_delta * next_layer_output
-			if(!aux) {
-				aux = matrix_multiply(*(delta_array->head->next->matrix),
-				*(nn_ptr->next->weights), delta_array->head->matrix, 0);
-			}
+			matrix_multiply(*(delta_array->head->next->matrix),
+			*(nn_ptr->next->weights), delta_array->head->matrix, 0);
 
 		}
-		if(aux) { matrix_array_free(delta_array); return 1; }
+
+		//layer_delta = layer_delta o RELU_DERIV(layer_output)
+		if(nn_ptr->activation_func != NULL)
+		nn_hadamard(nn_ptr, delta_array->head->matrix, *(nn_ptr->output));
+
 		nn_ptr = nn_ptr->prev;
 	} while(nn_ptr != NULL);
 
@@ -172,15 +187,14 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	//obliczanie delty wag dla poszczegolnych warstw
 		if(nn_ptr == nn->head) {
 			//layer_weight_delta = input * layer_delta
-			aux = outer_product(*input, *(delta_ptr->matrix), delta_ptr->matrix);
+			outer_product(*input, *(delta_ptr->matrix), delta_ptr->matrix);
 		}
 		else {
 			//layer_weight_delta = prev_layer_output * layer_delta
-			aux = outer_product(*(nn_ptr->prev->output),
+			outer_product(*(nn_ptr->prev->output),
 					*(delta_ptr->matrix),
 					delta_ptr->matrix);
 		}
-		if(aux) { matrix_array_free(delta_array); return 1; }
 
 	//alpha * weight_delta
       		matrix_multiply_by_num(delta_ptr->matrix, a);

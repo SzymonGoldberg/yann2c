@@ -422,7 +422,7 @@ int main (void)
 	b = matrix_alloc(2, 1);
 	c = matrix_alloc(3, 1);
 
-        aux = matrix_hadamard_product(a, b, c);
+        aux = matrix_hadamard_product(*a, *b, c);
 
 	if(!aux) puts("---Funkcja powinna zwrocic 1 a zwrocila 0");
 	else	puts("=== OK! ===");
@@ -437,7 +437,7 @@ int main (void)
 	matrix_fill(a, 3, 1.0, 2.0, 3.0);
 	matrix_fill(b, 3, 5.0, 5.0, 5.0);
 
-	aux = matrix_hadamard_product(a, b, c);
+	aux = matrix_hadamard_product(*a, *b, c);
 	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
 
 	double exp_multiply3[] = {5.0, 10.0, 15.0};
