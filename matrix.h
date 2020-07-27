@@ -4,8 +4,10 @@
 #define TRUE 1
 #define FALSE 0
 
-#define MAX(a, b) ((a) < (b) ? (b) : (a))
-#define RELU_DERIV(a) ((a) <= (0.0) ? (0.0) : (1.0))
+#define MAX(a, b)	((a) < (b) ? (b) : (a))
+#define RELU_DERIV(a)	((a) <= (0.0) ? (0.0) : (1.0))
+#define SIGMOID(x) 	((1.0)/((1.0) + exp((double) -x)))
+#define SIGMOID_DERIV(x)((double)(x) * ((1.0) - (x)))
 
 //typ opisujacy pojedyncza, prosta macierz
 typedef struct
@@ -87,9 +89,10 @@ void matrix_array_free(struct matrix_array *array);
 //tworzy pusta strukture matrix_array
 struct matrix_array * matrix_array_create(void);
 
-//funkcja poddaje <a> funkcji aktywacji relu, flaga <derivative> wskazuje czy
+//funkcja poddaje <a> funkcji aktywacji, flaga <derivative> wskazuje czy
 //ma zwrocic wynik funkcji czy pochodnej
 int ReLU(double *a, unsigned derivative);
+int sigmoid(double *a, unsigned derivative);
 
 void matrix_array_display(const struct matrix_array* array);
 
