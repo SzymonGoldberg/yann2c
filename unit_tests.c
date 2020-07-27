@@ -118,7 +118,7 @@ int main (void)
 	puts("=== OK! ===");
 
 
-	puts("TEST 6 ---matrix_multiply---(mnozenie przez macierz transponowana)");
+	puts("TEST 7 ---matrix_multiply---(mnozenie przez macierz transponowana)");
 	
 	aux = matrix_multiply(*c, *b, a, 1);
 	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
@@ -145,7 +145,7 @@ int main (void)
 	puts("=== OK! ===");
 
 
-	puts("TEST 7 ---matrix_multiply_by_num---");
+	puts("TEST 8 ---matrix_multiply_by_num---");
 
 	aux = matrix_multiply_by_num(b, 5);
 	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
@@ -174,14 +174,14 @@ int main (void)
 //====== TESTY ODEJMOWANIA MACIERZY =======
 
 
-	puts("TEST 8 ---matrix_substraction---");
+	puts("TEST 9 ---matrix_substraction---");
 
 	aux = matrix_substraction(*a, *b, NULL);
 	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
 	else puts("=== OK! ===");
 
 
-	puts("TEST 9 ---matrix_substraction---");
+	puts("TEST 10 ---matrix_substraction---");
 
 	matrix_t *d = matrix_alloc(2, 3);
 	matrix_t *e = matrix_alloc(2, 3);
@@ -191,7 +191,7 @@ int main (void)
 	else puts("=== OK! ===");
 
 
-	puts("TEST 10 ---matrix_substraction---");
+	puts("TEST 11 ---matrix_substraction---");
 
 	matrix_fill(d, 6,	3.0,	8.0,
 				1.0,	-13.0,
@@ -224,7 +224,7 @@ int main (void)
 //======= TESTY SIECI =======
 
 
-	puts("TEST 11 ---nn_create---");
+	puts("TEST 12 ---nn_create---");
 
 	struct nn_array *nn = nn_create();
 	if(nn == NULL)
@@ -235,34 +235,34 @@ int main (void)
 	else puts("=== OK! ===");
 
 
-	puts("TEST 12 ---nn_add_layer---");
+	puts("TEST 13 ---nn_add_layer---");
 
 	aux = nn_add_layer(NULL, 3, 3, NULL);
 	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
 	else puts("=== OK! ===");
 
 
-	puts("TEST 13 ---nn_add_layer---");
+	puts("TEST 14 ---nn_add_layer---");
 
 	aux = nn_add_layer(nn, 0, 3, NULL);
 	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
 	else puts("=== OK! ===");
 
-	puts("TEST 14 ---nn_add_layer---");
+	puts("TEST 15 ---nn_add_layer---");
 
 	aux = nn_add_layer(nn, 3, 0, NULL);
 	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
 	else puts("=== OK! ===");
 
 
-	puts("TEST 15 ---nn_add_layer---");
+	puts("TEST 16 ---nn_add_layer---");
 
 	aux = nn_add_layer(nn, 3, 3, NULL);
 	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
 	else puts("=== OK! ===");
 
 
-	puts("TEST 16 ---nn_predict---");
+	puts("TEST 17 ---nn_predict---");
 
 	matrix_fill(nn->tail->weights, 9,	0.1, 0.1,-0.3,
 						0.1, 0.2, 0.0,
@@ -293,7 +293,7 @@ int main (void)
 	puts("=== OK! ===");
 
 
-	puts("TEST 17 ---nn_predict---");
+	puts("TEST 18 ---nn_predict---");
 	matrix_fill(nn->tail->weights, 9,	0.1, 0.2,-0.1,
 					       -0.1, 0.1, 0.9,
 				       		0.1, 0.4, 0.1);
@@ -333,7 +333,7 @@ int main (void)
 	matrix_free(e);
 	matrix_free(input0);
 
-	puts("TEST 18 ---outer_product---");
+	puts("TEST 19 ---outer_product---");
 
 	a = matrix_alloc(3, 1);
 	matrix_fill(a, 3,	0.455, -0.02, 0.865);
@@ -370,7 +370,7 @@ int main (void)
 	nn_free(nn);
 
 
-	puts("TEST 19 ---nn_backpropagation---");
+	puts("TEST 20 ---nn_backpropagation---");
 
 	nn = nn_create();
 
@@ -415,7 +415,7 @@ int main (void)
 	matrix_free(b);
 
 
-	puts("TEST 20 ---matrix_hadamard_product---");
+	puts("TEST 21 ---matrix_hadamard_product---");
 
 
 	a = matrix_alloc(3, 1);
@@ -430,7 +430,7 @@ int main (void)
 	matrix_free(b);
 
 
-	puts("TEST 21 ---matrix_hadamard_product---");
+	puts("TEST 22 ---matrix_hadamard_product---");
 
 	b = matrix_alloc(3, 1);
 
@@ -465,7 +465,7 @@ int main (void)
 	matrix_free(c);
 	nn_free(nn);
 
-	puts("TEST 22 ---nn_backpropagation---(z funkcja aktywacji)");
+	puts("TEST 23 ---nn_backpropagation---(z funkcja aktywacji)");
 
 	nn = nn_create();
 
@@ -482,11 +482,106 @@ int main (void)
 	b->matrix[0] = 0.1;
 
 	nn_backpropagation(nn, a, b, 0.01);
-	nn_display(nn);		//DEBUG
+
+	double exp_weights1[] = {0.30085, 1.1, -0.29915};
+
+	err = 0;
+	for(int i = 0; i < 3; ++i)
+	{
+		if( nn->tail->weights->matrix[i] > exp_weights1[i] + 0.001 ||
+			nn->tail->weights->matrix[i] < exp_weights1[i] - 0.001)
+		{
+			printf("--powinno byc");
+			printf("%lf a jest %lf\n",exp_weights1[i],
+				nn->tail->weights->matrix[i]);
+			err++;
+		}
+	}
+	if(err) printf("---funkcja zle obliczyla %i wag\n", err);
+	else	printf("=== OK! ===\n");
+
+	double exp_weights2[] = {0.10255, -0.1, 0.09745};
+
+	err = 0;
+	for(int i = 0; i < 3; ++i)
+	{
+		if( nn->head->weights->matrix[i] > exp_weights2[i] + 0.001 ||
+			nn->head->weights->matrix[i] < exp_weights2[i] - 0.001)
+		{
+			printf("--powinno byc");
+			printf("%lf a jest %lf\n",exp_weights2[i],
+				nn->head->weights->matrix[i]);
+			err++;
+		}
+	}
+	if(err) printf("---funkcja zle obliczyla %i wag\n", err);
+	else	printf("=== OK! ===\n");
+
 
 	nn_free(nn);
 	matrix_free(a);
 	matrix_free(b);
 
+	puts("TEST 24 ---nn_backpropagation---(z funkcja aktywacji)");
+
+	nn = nn_create();
+
+	nn_add_layer(nn, 3, 3, (ReLU));
+	matrix_fill(nn->tail->weights, 9,	0.1, 0.2,-0.1,
+					       -0.1, 0.1, 0.9,
+						0.1, 0.4, 0.1);
+	nn_add_layer(nn, 3, 3, NULL);
+	matrix_fill(nn->tail->weights, 9,	0.3, 1.1,-0.3,
+					       	0.1, 0.2, 0.0,
+						0.0, 1.3, 0.1);
+	a = matrix_alloc(3, 1);
+	matrix_fill(a, 3, 8.5, 0.65, 1.2);
+
+	b = matrix_alloc(3, 1);
+	matrix_fill(b, 3, 0.1, 1.0, 0.1);
+
+	nn_backpropagation(nn, a, b, 0.01);
+	
+	double exp_weights3[] = {0.299024, 1.09967, -0.301396,
+				0.107353, 0.202522, 0.0105165,
+				-0.0034959, 1.2988, 0.0950001};
+
+	err = 0;
+	for(int i = 0; i < 9; ++i)
+	{
+		if( nn->tail->weights->matrix[i] > exp_weights3[i] + 0.001 ||
+			nn->tail->weights->matrix[i] < exp_weights3[i] - 0.001)
+		{
+			printf("--powinno byc");
+			printf("%lf a jest %lf\n",exp_weights3[i],
+				nn->tail->weights->matrix[i]);
+			err++;
+		}
+	}
+	if(err) printf("---funkcja zle obliczyla %i wag\n", err);
+	else	printf("=== OK! ===\n");
+
+	double exp_weights4[] = {0.104373, 0.200334, -0.0993826,
+				-0.140996, 0.0968651, 0.894212,
+				0.099439, 0.399957, 0.0999208};
+
+	err = 0;
+	for(int i = 0; i < 9; ++i)
+	{
+		if( nn->head->weights->matrix[i] > exp_weights4[i] + 0.001 ||
+			nn->head->weights->matrix[i] < exp_weights4[i] - 0.001)
+		{
+			printf("--powinno byc");
+			printf("%lf a jest %lf\n",exp_weights4[i],
+				nn->head->weights->matrix[i]);
+			err++;
+		}
+	}
+	if(err) printf("---funkcja zle obliczyla %i wag\n", err);
+	else	printf("=== OK! ===\n");
+
+	matrix_free(a);
+	matrix_free(b);
+	nn_free(nn);
 	return 0;
 }
