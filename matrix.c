@@ -4,7 +4,6 @@
 #include <time.h>
 #include "matrix.h"
 
-
 //======= FUNKCJE DO MACIERZY (MATRIX_T) =======
 
 matrix_t*
@@ -13,14 +12,10 @@ matrix_alloc(unsigned x, unsigned y)
 	//sprawdzam poprawnosc podanych do funkcji danych
 	if( !x || !y) return NULL;
 
-	//alokuje pamiec
 	matrix_t *result = (matrix_t *) calloc(1, sizeof(matrix_t));
-	//jesli alokacja sie nie udala zwracam NULL
 	if(result == NULL) return NULL;
 
-	//alokacja na macierz
 	(*result).matrix = (double *) calloc( x * y, sizeof(double));
-	//jesli alokacja sie nie powiedzie
 	if( (*result).matrix == NULL)
 	{
 		free( result);
@@ -49,11 +44,11 @@ matrix_display(const matrix_t a)
 
 
 void
-matrix_free(matrix_t *a) {
-	if(a != NULL) {
-		if((*a).matrix != NULL) free((*a).matrix );
-		free(a);
-	}
+matrix_free(matrix_t *a)
+{
+	if(a == NULL) return;
+	if((*a).matrix != NULL) free((*a).matrix );
+	free(a);
 }
 
 
@@ -73,7 +68,6 @@ matrix_fill(matrix_t *a, unsigned int N, ...)
 	for(unsigned i = 0; i < N; ++i)
 		(*a).matrix[i] = va_arg(list, double);
 
-	//zamykam liste, zwracam zero w przypadku sukcesu
 	va_end(list);
 	return 0;
 }
@@ -89,7 +83,6 @@ matrix_multiply(const matrix_t a, const matrix_t b, matrix_t *result,
 //sprawdzam czy mozna obie macierze mnozyc
 	if(a.x != b.y && !transposed) return 2;
 	if(a.x != b.x && transposed) return 2;
-
 
 //sprawdzam miejsce w macierzy wynikowej
 	if(((*result).x != b.y || (*result).y != a.y) && transposed) return 2;
@@ -114,16 +107,13 @@ matrix_multiply(const matrix_t a, const matrix_t b, matrix_t *result,
 	return 0;
 }
 
+
 int
 matrix_hadamard_product(matrix_t a, matrix_t b, matrix_t *result)
 {
 //walidacja danych
 	if(result == NULL) return 1;
-
-//sprawdzam czy mozna obie macierze mnozyc
 	if(a.x != b.x || a.y != b.y) return 2;
-
-//sprawdzam miejsce w macierzy wynikowej
 	if(result->x != b.x || result->y != b.y) return 2;
 
 //mnozenie macierzy
@@ -172,6 +162,7 @@ matrix_multiply_by_num(matrix_t *a, const double b)
 	return 0;
 }
 
+
 int
 outer_product(const matrix_t a, const matrix_t b, matrix_t *result)
 {
@@ -214,17 +205,14 @@ matrix_node_create(unsigned x, unsigned y)
 
 //alokacja pamieci strukture macierzy
 	(*result).matrix = matrix_alloc(x, y);
-	if( (*result).matrix == NULL )
-	{
-         	free(result);
-		return NULL;
-	}
+	if( (*result).matrix == NULL ) { free(result); return NULL; }
 
 	result->next = NULL;
 	result->prev = NULL;
 
  	return result;
 }
+
 
 int
 matrix_array_append(struct matrix_array * array, unsigned x, unsigned y)
@@ -302,9 +290,6 @@ ReLU(double *a, unsigned derivative)
 	*a = derivative ? RELU_DERIV(*a) : MAX(*a, 0);
 	return 0;
 }
-
-
-
 
 //======= GLOWNIE DO DEBUGU - USUNAC W KONCOWEJ WERSJI =======
 

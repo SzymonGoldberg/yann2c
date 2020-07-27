@@ -66,7 +66,6 @@ int matrix_multiply_by_num(matrix_t *a, const double b);
 //nowa macierz ktora wpisuje do <result> w przypadku sukcesu - 0, porazka - 1
 int outer_product(const matrix_t a, const matrix_t b, matrix_t *result);
 
-
 //zwykly append listy, dodaje nowy element z macierza o wielkosci <x,y>
 //na koniec listy (tail) w przypadku sukcesu 0, w przypadku porazki 1
 int matrix_array_append(struct matrix_array * array, unsigned x, unsigned y);
@@ -86,11 +85,11 @@ struct matrix_node * matrix_node_create(unsigned x, unsigned y);
 void matrix_array_free(struct matrix_array *array);
 
 //tworzy pusta strukture matrix_array
-struct matrix_array *
-matrix_array_create(void);
+struct matrix_array * matrix_array_create(void);
 
-int
-ReLU(double *a, unsigned derivative);
+//funkcja poddaje <a> funkcji aktywacji relu, flaga <derivative> wskazuje czy
+//ma zwrocic wynik funkcji czy pochodnej
+int ReLU(double *a, unsigned derivative);
 
 void matrix_array_display(const struct matrix_array* array);
 
