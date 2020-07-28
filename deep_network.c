@@ -42,7 +42,7 @@ nn_layer_create(unsigned x, unsigned y)
 
 int
 nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
-	int (*activation_func)(double *, unsigned))
+	void (*activation_func)(double *, unsigned))
 {
 	if(nn == NULL) return 1;
 	if(!size) return 1;
@@ -164,7 +164,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 		{
 			matrix_array_append_front(delta_array, expected_output->x, 1);
 
-			//last_layer_delta = layer_output - expeced_output
+		//last_layer_delta = layer_output - expeced_output
 			matrix_substraction(*(nn_ptr->output),
 				*expected_output, delta_array->head->matrix);
 		}
@@ -173,7 +173,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
                  	matrix_array_append_front(delta_array, nn_ptr->output->x,
 				delta_array->head->matrix->y);
 
-			//layer_delta = next_layer_delta * next_layer_output
+		//layer_delta = next_layer_delta * next_layer_output
 			matrix_multiply(*(delta_array->head->next->matrix),
 			*(nn_ptr->next->weights), delta_array->head->matrix, 0);
 		}
@@ -195,17 +195,16 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 		if(nn_ptr == nn->head) {
 			mtrx = matrix_alloc(input->x, delta_ptr->matrix->x);
 			
-			//layer_weight_delta = layer_delta o input 
+		//layer_weight_delta = layer_delta o input 
 			outer_product(*(delta_ptr->matrix), *input, mtrx);
-
 		}
 		else {
 			mtrx = matrix_alloc(nn_ptr->prev->output->x,delta_ptr->matrix->x);
 			
-			//layer_weight_delta = layer_delta o prev_layer_output
+		//layer_weight_delta = layer_delta o prev_layer_output
 			outer_product( *(delta_ptr->matrix),*(nn_ptr->prev->output), mtrx);
 		}
-	//alpha * weight_delta
+	//weight_delta *= alpha
       		matrix_multiply_by_num(mtrx, a);
 
 	//layer_weights = layer_weights - delta_weight * alpha
@@ -221,6 +220,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	return 0;
 }
 
+//---======= DO DEBUGU, WYWALIC W KONCOWEJ WERSJI ======---
 
 void
 nn_display(const struct nn_array *nn)
@@ -238,21 +238,21 @@ nn_display(const struct nn_array *nn)
 		if(ptr->next != NULL) puts("|\n|\nV\n");
 		ptr = ptr->next;
 	}
-
 }
 
 //---======= FUNKCJE AKTYWACJI =======---
 
-int
-ReLU(double *a, unsigned derivative)
-{
+void
+ReLU(double *a, unsigned derivative) {
 	*a = derivative ? RELU_DERIV(*a) : MAX(*a, 0);
-	return 0;
 }
 
-int
-sigmoid(double *a, unsigned derivative)
-{
- 	*a = derivative ? SIGMOID(*a) : SIGMOID_DERIV(*a);
-	return 0;
+void
+sigmoid(double *a, unsigned derivative) {
+ 	*a = derivative ? SIGMOID_DERIV(*a) : SIGMOID(*a);
+}
+
+void
+xtanh(double *a, unsigned derivative) {
+	*a = derivative ? TANH_DERIV(*a) : TANH(*a);
 }

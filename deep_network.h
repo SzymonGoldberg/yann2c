@@ -1,10 +1,18 @@
 #ifndef _DEEP_NETWORK_H_
 #define _DEEP_NETWORK_H_
 
+//---======= MAKRA DO FUNKCJI AKTYWACJI ======---
+
 #define MAX(a, b)	((a) < (b) ? (b) : (a))
 #define RELU_DERIV(a)	((a) <= (0.0) ? (0.0) : (1.0))
+
 #define SIGMOID(x) 	((1.0)/((1.0) + exp((double) -x)))
-#define SIGMOID_DERIV(x)((double)(x) * ((1.0) - (x)))
+#define SIGMOID_DERIV(x)((x) * ((1.0) - (double)(x)))
+
+#define TANH(x)	       	((exp((double)(x)) - exp((double)(-x)))/	\
+			(exp((double)(x)) + exp((double)(-x)))) 
+#define TANH_DERIV(x)	((1.0) - ((x) * (x)))
+
 
 //struktury wskazujace na siec neuronowa (nEURAL nETWORK)
 //wieghts to macierz wag, output to po prostu ostatnie wyjscie z danej
@@ -12,7 +20,7 @@
 struct nn_layer {
  	matrix_t *weights;
  	matrix_t *output;
-	int (*activation_func)(double *, unsigned);
+	void (*activation_func)(double *, unsigned);
 	struct nn_layer *next;
 	struct nn_layer *prev;
 };
@@ -35,7 +43,7 @@ struct nn_layer * nn_layer_create(unsigned x, unsigned y);
 //zwraca 0 w przypadku porazki, w innym przypadku 1
 int
 nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
-	int (*activation_func)(double *, unsigned));
+	void (*activation_func)(double *, unsigned));
 
 //zwalnia cala pamiec przydzielona na strukture <nn>
 void nn_free(struct nn_array *nn);
@@ -54,9 +62,12 @@ void nn_display(const struct nn_array *nn);
 int nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	const matrix_t* expected_output, double a);
 
+//---====== DEKLARACJE FUNKCJI AKTYWACJI ======---
+
 //funkcja poddaje <a> funkcji aktywacji, flaga <derivative> wskazuje czy
 //ma zwrocic wynik funkcji czy pochodnej
-int ReLU(double *a, unsigned derivative);
-int sigmoid(double *a, unsigned derivative);
+void ReLU(double *a, unsigned derivative);
+void sigmoid(double *a, unsigned derivative);
+void xtanh(double *a, unsigned derivative);
 
 #endif
