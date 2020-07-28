@@ -34,16 +34,16 @@ struct nn_array {
 //w przypadku sukcesu zwraca jej adres, w innym przypadku zwraca NULL
 struct nn_array * nn_create(void);
 
-struct nn_layer * nn_layer_create(unsigned x, unsigned y);
+struct nn_layer * nn_layer_create(unsigned x, unsigned y, unsigned batch_size);
 
 //funkcja dodaje siec <size> neuronow na koniec struktury <nn> (tail)
 //i przypisuje jej pewna funkcje aktywacji <activation_func>
 //jesli struktura byla pusta to pierwsza macierz ma wymiary - (<input>, <size>)
 //w przypadku istniejacych juz wczesniej warstw - (wyjscie poprzedniej warstwy, <size>)
+//<batch_size> okresla ilosc danych w serii
 //zwraca 0 w przypadku porazki, w innym przypadku 1
-int
-nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
-	void (*activation_func)(double *, unsigned));
+int nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
+	unsigned batch_size, void (*activation_func)(double *, unsigned));
 
 //zwalnia cala pamiec przydzielona na strukture <nn>
 void nn_free(struct nn_array *nn);

@@ -18,8 +18,9 @@ nn_create(void)
 
 
 struct nn_layer *
-nn_layer_create(unsigned x, unsigned y)
+nn_layer_create(unsigned x, unsigned y, unsigned batch_size)
 {
+	if(!x || !y || !batch_size) return NULL;
 	struct nn_layer *a = (struct nn_layer *)
 					calloc(1, sizeof(struct nn_layer));
 	if(a == NULL) return NULL;
@@ -27,7 +28,7 @@ nn_layer_create(unsigned x, unsigned y)
 	a->weights = matrix_alloc(x, y);
 	if(a->weights == NULL) { free(a); return NULL; }
 
-	a->output = matrix_alloc(y, 1);
+	a->output = matrix_alloc(y, batch_size);
 	if(a->weights == NULL)
 	{
 		matrix_free(a->weights);
@@ -42,22 +43,21 @@ nn_layer_create(unsigned x, unsigned y)
 
 int
 nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
-	void (*activation_func)(double *, unsigned))
+	unsigned batch_size, void (*activation_func)(double *, unsigned))
 {
 	if(nn == NULL) return 1;
-	if(!size) return 1;
 
   	struct nn_layer *new_layer;
 	if(nn->tail == NULL)
 	{
 		if(!input) return 1;
- 		new_layer = nn_layer_create(input, size);
+ 		new_layer = nn_layer_create(input, size, batch_size);
 		if(new_layer == NULL) return 1;
 		nn->head = new_layer;
 	}
 	else
 	{
- 		new_layer = nn_layer_create(nn->tail->weights->y, size);
+ 		new_layer = nn_layer_create(nn->tail->weights->y, size, batch_size);
 		if(new_layer == NULL) return 1;
 		nn->tail->next = new_layer;
 		new_layer->prev = nn->tail;
