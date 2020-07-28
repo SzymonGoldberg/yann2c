@@ -1,6 +1,11 @@
 #ifndef _DEEP_NETWORK_H_
 #define _DEEP_NETWORK_H_
 
+#define MAX(a, b)	((a) < (b) ? (b) : (a))
+#define RELU_DERIV(a)	((a) <= (0.0) ? (0.0) : (1.0))
+#define SIGMOID(x) 	((1.0)/((1.0) + exp((double) -x)))
+#define SIGMOID_DERIV(x)((double)(x) * ((1.0) - (x)))
+
 //struktury wskazujace na siec neuronowa (nEURAL nETWORK)
 //wieghts to macierz wag, output to po prostu ostatnie wyjscie z danej
 //warstwy neuronow
@@ -48,5 +53,10 @@ void nn_display(const struct nn_array *nn);
 //w przypadku sukcesu 0, w innym wypadku 1
 int nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	const matrix_t* expected_output, double a);
+
+//funkcja poddaje <a> funkcji aktywacji, flaga <derivative> wskazuje czy
+//ma zwrocic wynik funkcji czy pochodnej
+int ReLU(double *a, unsigned derivative);
+int sigmoid(double *a, unsigned derivative);
 
 #endif

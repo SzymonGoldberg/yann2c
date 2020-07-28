@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "matrix.h"
 #include "deep_network.h"
 
@@ -177,7 +178,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 			*(nn_ptr->next->weights), delta_array->head->matrix, 0);
 		}
 
-		//layer_delta = layer_delta o RELU_DERIV(layer_output)
+		//layer_delta = layer_delta o activation_func(layer_output)
 
 		if(nn_ptr->activation_func != NULL)
         		nn_hadamard(nn_ptr, delta_array->head->matrix);
@@ -238,4 +239,20 @@ nn_display(const struct nn_array *nn)
 		ptr = ptr->next;
 	}
 
+}
+
+//---======= FUNKCJE AKTYWACJI =======---
+
+int
+ReLU(double *a, unsigned derivative)
+{
+	*a = derivative ? RELU_DERIV(*a) : MAX(*a, 0);
+	return 0;
+}
+
+int
+sigmoid(double *a, unsigned derivative)
+{
+ 	*a = derivative ? SIGMOID(*a) : SIGMOID_DERIV(*a);
+	return 0;
 }

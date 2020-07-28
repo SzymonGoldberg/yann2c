@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
-#include <math.h>
 #include "matrix.h"
 
 //======= FUNKCJE DO MACIERZY (MATRIX_T) =======
@@ -281,22 +280,6 @@ matrix_array_free(struct matrix_array *array)
 	} while(ptr != NULL);
 	
 	free(array);
-}
-
-//======= FUNKCJE AKTYWACJI ==================================
-
-int
-ReLU(double *a, unsigned derivative)
-{
-	*a = derivative ? RELU_DERIV(*a) : MAX(*a, 0);
-	return 0;
-}
-
-int
-sigmoid(double *a, unsigned derivative)
-{
- 	*a = derivative ? SIGMOID(*a) : SIGMOID_DERIV(*a);
-	return 0;
 }
 
 //======= GLOWNIE DO DEBUGU - USUNAC W KONCOWEJ WERSJI =======
