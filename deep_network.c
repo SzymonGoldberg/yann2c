@@ -113,10 +113,9 @@ nn_predict(struct nn_array *nn, const matrix_t *input)
 
 	//stosuje funkcje aktywacji na wyjsciu danej warstwy (jesli jakas funkcja jest)
 		if(ptr->activation_func != NULL)
-		{
 			for(unsigned i = 0; i < (ptr->output->x) * (ptr->output->y); ++i)
 				(ptr->activation_func)(&(ptr->output->matrix[i]), 0);
-		}
+
 		ptr = ptr->next;
 	}
 	while(ptr != NULL);
