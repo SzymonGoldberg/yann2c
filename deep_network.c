@@ -164,7 +164,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 			if(nn_ptr == nn->tail)
 				nn_ptr->delta = matrix_alloc(exp_output->x, 1);
 			else
-				nn_ptr->delta = matrix_alloc(nn_ptr->next->output->x,
+				nn_ptr->delta = matrix_alloc(nn_ptr->next->weights->x,
 							nn_ptr->next->delta->y);
 			nn_ptr = nn_ptr->prev;
 		} while(nn_ptr != NULL);
@@ -178,14 +178,12 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 		//last_layer_delta = layer_output - expeced_output
 			matrix_substraction(*(nn_ptr->output),
 				*exp_output, nn_ptr->delta);
-			matrix_display(*nn_ptr->delta);	//debug
 		}
 		else
 		{
 		//layer_delta = next_layer_delta * next_layer_output
 			matrix_multiply(*(nn_ptr->next->delta),
 			*(nn_ptr->next->weights), nn_ptr->delta, 0);
-			matrix_display(*nn_ptr->delta);	//debug
 		}
 
 	//layer_delta = layer_delta o activation_func(layer_output)

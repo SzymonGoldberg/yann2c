@@ -298,6 +298,3 @@ matrix_array_display(const struct matrix_array* array)
 		ptr = ptr->next;
 	}
 }
-
-void
-matrix_size(const matrix_t* a) {}
