@@ -36,7 +36,7 @@ nn_layer_create(unsigned x, unsigned y, unsigned batch_size)
 		return NULL;
 	}
 
-	a->prev = NULL; a->next = NULL; a->delta = NULL;
+	a->prev = NULL; a->next = NULL; a->delta = NULL; a->weight_delta = NULL;
 	return a;
 }
 
@@ -83,6 +83,7 @@ nn_free(struct nn_array *nn)
 		if(aux->weights != NULL) matrix_free(aux->weights);
 		if(aux->output != NULL) matrix_free(aux->output);
 		if(aux->delta != NULL) matrix_free(aux->delta);
+		if(aux->weight_delta != NULL) matrix_free(aux->weight_delta);
 		free(aux);
 
 		aux = ptr;
@@ -193,29 +194,36 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	} while(nn_ptr != NULL);
 
 	nn_ptr = nn->tail;
-	matrix_t *mtrx;	//zmienna pomocnicza do ktorej wpisuje iloczyn zew
+	if(nn_ptr->weight_delta == NULL)
+	{
+		do {
+			if(nn_ptr == nn->head) 
+				nn_ptr->weight_delta = matrix_alloc(input->x, nn_ptr->delta->x);
+			else
+				nn_ptr->weight_delta = matrix_alloc(nn_ptr->prev->output->x,
+							nn_ptr->delta->x);
+			nn_ptr = nn_ptr->prev;
+		} while(nn_ptr != NULL);
+	}
 
+	nn_ptr = nn->tail;
 //obliczanie delty wag dla poszczegolnych warstw i ew zmiana wartosci wag
 	do {
 		if(nn_ptr == nn->head) {
-			mtrx = matrix_alloc(input->x, nn_ptr->delta->x);
-			
 		//layer_weight_delta = layer_delta o input 
-			outer_product(*(nn_ptr->delta), *input, mtrx);
+			outer_product(*(nn_ptr->delta), *input, nn_ptr->weight_delta);
 		}
 		else {
-			mtrx = matrix_alloc(nn_ptr->prev->output->x, nn_ptr->delta->x);
-			
 		//layer_weight_delta = layer_delta o prev_layer_output
-			outer_product( *(nn_ptr->delta),*(nn_ptr->prev->output), mtrx);
+			outer_product( *(nn_ptr->delta),*(nn_ptr->prev->output),
+					nn_ptr->weight_delta);
 		}
 	//weight_delta *= alpha
-      		matrix_multiply_by_num(mtrx, a);
+      		matrix_multiply_by_num(nn_ptr->weight_delta, a);
 
 	//layer_weights = layer_weights - delta_weight * alpha
-		matrix_substraction(*nn_ptr->weights, *mtrx, nn_ptr->weights);
+		matrix_substraction(*nn_ptr->weights, *nn_ptr->weight_delta, nn_ptr->weights);
 
-		matrix_free(mtrx);
 		nn_ptr = nn_ptr->prev;
 	}
 	while(nn_ptr != NULL);
