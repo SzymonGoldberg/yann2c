@@ -93,7 +93,7 @@ int main (void)
 
 	puts("TEST 6 ---matrix_multiply---");
 	
-	int aux = matrix_multiply(*a, *b, c, 0);
+	int aux = matrix_multiply(*a, *b, c, 0, 0);
 	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
 
 	double exp_multiply0[] =       {5.0, 1.0,
@@ -120,7 +120,7 @@ int main (void)
 
 	puts("TEST 7 ---matrix_multiply---(mnozenie przez macierz transponowana)");
 	
-	aux = matrix_multiply(*c, *b, a, 1);
+	aux = matrix_multiply(*c, *b, a, 0, 1);
 	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
 
 	double exp_multiply1[] =       {16.0,	11.0,
@@ -651,6 +651,48 @@ int main (void)
 	matrix_free(a);
 	nn_free(nn);
 
+	puts("TEST 25 ---matrix_multiply---(obie transponowane)");
+
+	a = matrix_alloc(3, 2);
+	b = matrix_alloc(2, 3);
+	c = matrix_alloc(3, 3);
+
+	matrix_fill(a, 6,	1.0, 2.0, 3.0,
+						4.0, 5.0, 6.0);
+
+	matrix_fill(b, 6,	1.0, 24.0,
+						3.0, 6.0,
+						8.0, 12.0);
+
+	aux = matrix_multiply(*a, *b, c, 1, 1);
+
+	double exp_multiply4[] = {97, 27, 56,
+								122, 36, 76, 
+								147, 45, 96};
+
+	
+	err = 0;
+ 	for(int i = 0; i < 9; ++i)
+	{
+		if(	c->matrix[i] > exp_multiply4[i] + 0.001 ||
+	       		c->matrix[i] < exp_multiply4[i] - 0.001)
+		{
+                	printf("-Funkcja zle wypelnila %i komorke macierzy\n", i);
+			printf("--powinno byc %lf a jest %lf\n",
+				exp_multiply4[i], c->matrix[i]);
+			++err;
+		}
+	}
+	if(err) {
+		printf("---Funkcja zapelnila nieprawidlowo %i komorek macierzy\n", err);
+		return 1;
+	}
+
+	puts("=== OK! ===");
+
+	matrix_free(a);
+	matrix_free(b);
+	matrix_free(c);
 
 	return 0;
 }

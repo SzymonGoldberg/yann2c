@@ -39,10 +39,11 @@ void matrix_free(matrix_t *a);
 int matrix_fill(matrix_t *a, unsigned int N, ...);
 
 //mnozenie macierzy a przez b i wpisywanie wyniku do macierzy result
-//jesli transposed jest ustawione na 1 macierz b jest macierza transponowana
+//jesli <transposed_a> jest ustawione na 1 macierz <a> jest macierza transponowana
+//jesli <transposed_b> jest ustawione na 1 macierz <b> jest macierza transponowana
 //w przypadku sukcesu 0, nieprawidlowe dane 1, niemozliwosc przemnozenia 2
-int matrix_multiply(const matrix_t a, const matrix_t b,
-			matrix_t *result, char transposed);
+int matrix_multiply(const matrix_t a, const matrix_t b, matrix_t *result,
+	char transposed_a, char transposed_b);
 
 //mnozenie hadamarda <c> = <a> o <b>
 //w przypadku sukcesu zwraca 0 w innym wypadku 1

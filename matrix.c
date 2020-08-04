@@ -75,30 +75,45 @@ matrix_fill(matrix_t *a, unsigned int N, ...)
 
 int
 matrix_multiply(const matrix_t a, const matrix_t b, matrix_t *result,
-		char transposed)
+	char transposed_a, char transposed_b)
 {
 //walidacja danych
 	if(result == NULL) return 1;
 
-//sprawdzam czy mozna obie macierze mnozyc
-	if(a.x != b.y && !transposed) return 2;
-	if(a.x != b.x && transposed) return 2;
+	if(!transposed_a && !transposed_b) {
+		if(a.x != b.y) return 2;
+		if(result->x != b.x || result->y != a.y) return 2;
+	}
+	if(!transposed_a &&transposed_b) {
+		if(a.x != b.x) return 2;
+		if(result->x != b.y || result->y != a.y) return 2;
+	}
+	if(transposed_a && !transposed_b) {
+		if(a.y != b.y) return 2;
+		if(result->x != b.y || result->y != a.x) return 2;
+	}
+	if(transposed_a && transposed_b) {
+		if(a.y != b.x) return 2;
+		if(result->x != b.y || result->y != a.x) return 2;
+	}
 
-//sprawdzam miejsce w macierzy wynikowej
-	if(((*result).x != b.y || (*result).y != a.y) && transposed) return 2;
-	if(((*result).x != b.x || (*result).y != a.y) && !transposed) return 2;
+	double value = 0, a_value = 0, b_value = 0;
+	unsigned aux = transposed_a ? a.y : a.x;
 
 //mnozenie macierzy
-	double value = 0;
 	for(unsigned y = 0; y < (*result).y; ++y)
 	{
 		for(unsigned x = 0; x < (*result).x; ++x)
 		{
-			for(unsigned g = 0; g < a.x; ++g)
+			for(unsigned g = 0; g < aux; ++g)
 			{
-				value += transposed ?
-					a.matrix[g + y*a.x] * b.matrix[g + x*b.x]:
-					a.matrix[g + y*a.x] * b.matrix[x + g*b.x];
+				b_value = transposed_b ? b.matrix[g + x*b.x]
+										:b.matrix[x + g*b.x];
+				
+				a_value = transposed_a ? a.matrix[y + g*a.x]
+										:a.matrix[g + y*a.x];
+				
+				value += a_value * b_value;
 			}
 			(*result).matrix[x + y * (*result).x] = value;
 			value = 0;

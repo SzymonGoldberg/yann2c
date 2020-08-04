@@ -105,12 +105,12 @@ nn_predict(struct nn_array *nn, const matrix_t *input)
  		if(ptr == nn->head) {
 			matrix_multiply( *input,
 					*(ptr->weights),
-					ptr->output, 1);
+					ptr->output, 0, 1);
 		}
 		else {
                  	matrix_multiply(*(ptr->prev->output),
 					*(ptr->weights),
-					ptr->output, 1);
+					ptr->output, 0, 1);
 		}
 
 	//stosuje funkcje aktywacji na wyjsciu danej warstwy (jesli jakas funkcja jest)
@@ -184,7 +184,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 		{
 		//layer_delta = next_layer_delta * next_layer_output
 			matrix_multiply(*(nn_ptr->next->delta),
-			*(nn_ptr->next->weights), nn_ptr->delta, 0);
+			*(nn_ptr->next->weights), nn_ptr->delta, 0, 0);
 		}
 
 	//layer_delta = layer_delta o activation_func(layer_output)
