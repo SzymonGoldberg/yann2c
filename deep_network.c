@@ -36,7 +36,7 @@ nn_layer_create(unsigned x, unsigned y, unsigned batch_size)
 		return NULL;
 	}
 
-	a->prev = NULL; a->next = NULL;
+	a->prev = NULL; a->next = NULL; a->delta = NULL;
 	return a;
 }
 
@@ -82,6 +82,7 @@ nn_free(struct nn_array *nn)
 
 		if(aux->weights != NULL) matrix_free(aux->weights);
 		if(aux->output != NULL) matrix_free(aux->output);
+		if(aux->delta != NULL) matrix_free(aux->delta);
 		free(aux);
 
 		aux = ptr;
@@ -126,17 +127,17 @@ nn_predict(struct nn_array *nn, const matrix_t *input)
 
 //<delta> = <delta> o (funkcja aktywacji)<layer->output>
 int
-nn_hadamard(struct nn_layer *layer, matrix_t *delta)
+nn_hadamard(struct nn_layer *layer)
 {
-	if(layer == NULL || delta == NULL) return 1;
+	if(layer == NULL || layer->delta == NULL) return 1;
 	if(layer->activation_func == NULL) return 1;
 
 	double a;
-	for(unsigned i = 0; i < (delta->y) * (delta->x); ++i)
+	for(unsigned i = 0; i < (layer->delta->y) * (layer->delta->x); ++i)
 	{
 		a = layer->output->matrix[i];
 		(layer->activation_func)(&a, 1);
-		delta->matrix[i] = delta->matrix[i] * a;
+		layer->delta->matrix[i] = layer->delta->matrix[i] * a;
 	}
 	return 0;
 }
@@ -144,64 +145,71 @@ nn_hadamard(struct nn_layer *layer, matrix_t *delta)
 
 int
 nn_backpropagation(struct nn_array *nn, const matrix_t * input,
-	const matrix_t* expected_output, double a)
+	const matrix_t* exp_output, double a)
 {
 //sprawdzanie danych wejsciowych
-	if(nn ==NULL || expected_output == NULL) return 1;
-	if(nn->tail->output->x != expected_output->x) return 1;
+	if(nn ==NULL || exp_output == NULL) return 1;
+	if(nn->tail->output->x != exp_output->x) return 1;
 
 //nn_predict
 	if(nn_predict(nn, input)) return 1;
 	
 //zmienne pomocniczne
-	struct matrix_array * delta_array = matrix_array_create();//tablica delt
 	struct nn_layer *nn_ptr = nn->tail;//wskaznik na pojedyncza warstwe neuronow
 
+//alokacja pamieci na delty jesli nie zostaly wczesniej nie zaalokowane
+	if(nn_ptr->delta == NULL)
+	{
+		do {
+			if(nn_ptr == nn->tail)
+				nn_ptr->delta = matrix_alloc(exp_output->x, 1);
+			else
+				nn_ptr->delta = matrix_alloc(nn_ptr->next->output->x,
+							nn_ptr->next->delta->y);
+			nn_ptr = nn_ptr->prev;
+		} while(nn_ptr != NULL);
+	}
+
+	nn_ptr = nn->tail;
 //obliczanie delty dla poszczegolnych warstw
 	do {
 		if(nn_ptr == nn->tail)
 		{
-			matrix_array_append_front(delta_array, expected_output->x, 1);
-
 		//last_layer_delta = layer_output - expeced_output
 			matrix_substraction(*(nn_ptr->output),
-				*expected_output, delta_array->head->matrix);
+				*exp_output, nn_ptr->delta);
+			matrix_display(*nn_ptr->delta);	//debug
 		}
 		else
 		{
-                 	matrix_array_append_front(delta_array, nn_ptr->output->x,
-				delta_array->head->matrix->y);
-
 		//layer_delta = next_layer_delta * next_layer_output
-			matrix_multiply(*(delta_array->head->next->matrix),
-			*(nn_ptr->next->weights), delta_array->head->matrix, 0);
+			matrix_multiply(*(nn_ptr->next->delta),
+			*(nn_ptr->next->weights), nn_ptr->delta, 0);
+			matrix_display(*nn_ptr->delta);	//debug
 		}
 
-		//layer_delta = layer_delta o activation_func(layer_output)
-
-		if(nn_ptr->activation_func != NULL)
-        		nn_hadamard(nn_ptr, delta_array->head->matrix);
+	//layer_delta = layer_delta o activation_func(layer_output)
+		if(nn_ptr->activation_func != NULL) nn_hadamard(nn_ptr);
 
 		nn_ptr = nn_ptr->prev;
 	} while(nn_ptr != NULL);
 
 	nn_ptr = nn->tail;
-	struct matrix_node *delta_ptr = delta_array->tail;//wskaznik na poj. delte
 	matrix_t *mtrx;	//zmienna pomocnicza do ktorej wpisuje iloczyn zew
 
 //obliczanie delty wag dla poszczegolnych warstw i ew zmiana wartosci wag
 	do {
 		if(nn_ptr == nn->head) {
-			mtrx = matrix_alloc(input->x, delta_ptr->matrix->x);
+			mtrx = matrix_alloc(input->x, nn_ptr->delta->x);
 			
 		//layer_weight_delta = layer_delta o input 
-			outer_product(*(delta_ptr->matrix), *input, mtrx);
+			outer_product(*(nn_ptr->delta), *input, mtrx);
 		}
 		else {
-			mtrx = matrix_alloc(nn_ptr->prev->output->x,delta_ptr->matrix->x);
+			mtrx = matrix_alloc(nn_ptr->prev->output->x, nn_ptr->delta->x);
 			
 		//layer_weight_delta = layer_delta o prev_layer_output
-			outer_product( *(delta_ptr->matrix),*(nn_ptr->prev->output), mtrx);
+			outer_product( *(nn_ptr->delta),*(nn_ptr->prev->output), mtrx);
 		}
 	//weight_delta *= alpha
       		matrix_multiply_by_num(mtrx, a);
@@ -211,11 +219,9 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 
 		matrix_free(mtrx);
 		nn_ptr = nn_ptr->prev;
-		delta_ptr = delta_ptr->prev;
 	}
 	while(nn_ptr != NULL);
 
-	matrix_array_free(delta_array);
 	return 0;
 }
 
@@ -228,6 +234,7 @@ nn_display(const struct nn_array *nn)
 	struct nn_layer *ptr = nn->head;
 	while(ptr != NULL)
 	{
+		if(ptr->delta!= NULL) puts("IS_DELTA");	//DEBUG
 		puts("WEIGHTS:");
 		matrix_display(*(ptr->weights));
 		puts("\nOUTPUT:");

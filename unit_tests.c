@@ -517,6 +517,8 @@ int main (void)
 	if(err) printf("---funkcja zle obliczyla %i wag\n", err);
 	else	printf("=== OK! ===\n");
 
+	nn_display(nn); //DEBUG
+
 
 	nn_free(nn);
 	matrix_free(a);

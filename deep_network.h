@@ -20,6 +20,7 @@
 struct nn_layer {
  	matrix_t *weights;
  	matrix_t *output;
+ 	matrix_t *delta;
 	void (*activation_func)(double *, unsigned);
 	struct nn_layer *next;
 	struct nn_layer *prev;
