@@ -15,18 +15,18 @@
 
 
 //struktury wskazujace na siec neuronowa (nEURAL nETWORK)
-//wieghts to macierz wag, output to po prostu ostatnie wyjscie z danej
-//warstwy neuronow
+//wieghts to macierz wag, output to wyjscie z danej warstwy neuronow
 struct nn_layer {
- 	matrix_t *weights;
- 	matrix_t *output;
+ 	matrix_t *weights;	//wagi polaczen miedzy neuronami
+ 	matrix_t *output;	//wartosci danej warstwy neuronow
 
  	matrix_t *delta;
 	matrix_t *weight_delta;
-	matrix_t *dropout_mask;
-	double dropout_rate;
 
-	void (*activation_func)(double *, unsigned);
+	matrix_t *dropout_mask;
+	double dropout_rate;	//procentowa ilosc wlaczonych neuronow w dropout_mask
+
+	void (*activation_func)(double *, unsigned);	//funkcja aktywacji
 
 	struct nn_layer *next;
 	struct nn_layer *prev;
@@ -47,7 +47,10 @@ struct nn_layer * nn_layer_create(unsigned x, unsigned y, unsigned batch_size);
 //i przypisuje jej pewna funkcje aktywacji <activation_func>
 //jesli struktura byla pusta to pierwsza macierz ma wymiary - (<input>, <size>)
 //w przypadku istniejacych juz wczesniej warstw - (wyjscie poprzedniej warstwy, <size>)
-//<batch_size> okresla ilosc danych w serii
+//<batch_size> okresla ilosc danych w serii, jest brane pod uwage tylko przy
+//pierwszej warstwie, w kolejnych wartosc ta jest pobierana z pierwszej
+//<dropout> to procentowa ilosc neuronow do wylaczenia w przypadku uzywania
+//tej metody - aby jej nie uzywac wystarczy wpisac 0.0
 //zwraca 0 w przypadku porazki, w innym przypadku 1
 int nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
 unsigned batch_size, void (*activation_func)(double *, unsigned), double dropout);
@@ -55,19 +58,21 @@ unsigned batch_size, void (*activation_func)(double *, unsigned), double dropout
 //zwalnia cala pamiec przydzielona na strukture <nn>
 void nn_free(struct nn_array *nn);
 
-//przelicza odpowiedz sieci <nn> na wejscie <input> w postaci wektora
-//czyli macierzy dla ktorej y = 1. jezeli dana warstwa ma funkcje aktywacji to
-//funkcja ta bierze to pod uwage. w przypadku sukcesu 0, w innym wypadku !0
-int nn_predict(struct nn_array *nn, const matrix_t *input);
+//przelicza odpowiedz sieci <nn> na wejscie <input> w postaci macierzy.
+//Jezeli dana warstwa ma funkcje aktywacji to funkcja ta bierze to pod uwage.
+//flaga <dropout> okresla czy uzywac metode dropout
+//w przypadku sukcesu 0, w innym wypadku !0
+int nn_predict(struct nn_array *nn, const matrix_t *input, char dropout);
 
 //wyswietlanie <nn> w formie macierzy wag i ostatnich odpowiedzi
 void nn_display(const struct nn_array *nn);
 
 //na podstawie <expected_output> modyfikuje wagi poszczegolnych warstw
 //neuronow w sieci <nn>; <input> - macierz wejsciowa, <a> - wspolczynnik uczenia alpha
+//<dropout> - flaga wskazuje czy korzystac z metody uczenia dropout
 //w przypadku sukcesu 0, w innym wypadku 1
-int nn_batch_backpropagation(struct nn_array *nn, const matrix_t * input,
-	const matrix_t* exp_output, double a);
+int nn_backpropagation(struct nn_array *nn, const matrix_t * input,
+	const matrix_t* exp_output, double a, char dropout);
 
 //---====== DEKLARACJE FUNKCJI AKTYWACJI ======---
 

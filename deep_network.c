@@ -46,6 +46,7 @@ nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
 	unsigned batch_size, void (*activation_func)(double *, unsigned), double dropout)
 {
 	if(nn == NULL) return 1;
+	if(dropout >= 1.0) return 1;
 
   	struct nn_layer *new_layer;
 	if(nn->tail == NULL)
@@ -70,7 +71,8 @@ nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
 	//alokacja
 		new_layer->dropout_mask = matrix_alloc(new_layer->output->x,
 							new_layer->output->y);
-		if(new_layer->dropout_mask == NULL) {
+		if(new_layer->dropout_mask == NULL)
+		{
 			nn->tail = new_layer;
 			return 1;
 		}
@@ -78,12 +80,17 @@ nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
 
 	//aux = liczba neuronow do wylaczenia
 		int aux = size * dropout;
-		new_layer->dropout_rate =  ((double)(aux) / (size));
+		new_layer->dropout_rate = 1.0 - ((double)(aux) / (size));
 
 	//zapelniam dropout_mask jedynkami
 		for(int i = 0; i < size; ++i)
 			new_layer->dropout_mask->matrix[i] = 1;
 
+	//===============================
+	//PONIZSZY KOD WYKONUJE SIE W NIEDETERMISTYCZNYM CZASIE
+	//DO ZMIANY W KONCOWEJ WERSJI !!!!
+	//===============================
+	
 	//losuje komorki macierzy ktore wyzeruje
 		int random;
 		do {
@@ -116,6 +123,7 @@ nn_free(struct nn_array *nn)
 		if(aux->weights != NULL) matrix_free(aux->weights);
 		if(aux->output != NULL) matrix_free(aux->output);
 		if(aux->delta != NULL) matrix_free(aux->delta);
+		if(aux->dropout_mask != NULL) matrix_free(aux->dropout_mask);
 		if(aux->weight_delta != NULL) matrix_free(aux->weight_delta);
 		free(aux);
 
@@ -127,7 +135,7 @@ nn_free(struct nn_array *nn)
 
 
 int
-nn_predict(struct nn_array *nn, const matrix_t *input)
+nn_predict(struct nn_array *nn, const matrix_t *input, char dropout)
 {
  	if(nn == NULL) return 1;
 	if(input == NULL) return 1;
@@ -150,6 +158,16 @@ nn_predict(struct nn_array *nn, const matrix_t *input)
 		if(ptr->activation_func != NULL)
 			for(unsigned i = 0; i < (ptr->output->x) * (ptr->output->y); ++i)
 				(ptr->activation_func)(&(ptr->output->matrix[i]), 0);
+
+	//stosuje metode dropout jesli jest oznaczona odpowiednia flaga
+		if(dropout && ptr->dropout_mask != NULL)
+		{
+		//values = values * dropout mask
+			matrix_hadamard(*ptr->output, *ptr->dropout_mask, ptr->output);
+
+		//value = value * 1 / % wl neuronow
+			matrix_multiply_by_num(ptr->output, (1.0)/(ptr->dropout_rate));
+		}
 
 		ptr = ptr->next;
 	}
@@ -178,15 +196,15 @@ nn_hadamard(struct nn_layer *layer)
 
 
 int
-nn_batch_backpropagation(struct nn_array *nn, const matrix_t * input,
-	const matrix_t* exp_output, double a)
+nn_backpropagation(struct nn_array *nn, const matrix_t * input,
+	const matrix_t* exp_output, double a, char dropout)
 {
 //sprawdzanie danych wejsciowych
 	if(nn ==NULL || exp_output == NULL) return 1;
 	if(nn->tail->output->x != exp_output->x) return 1;
 
 //nn_predict
-	if(nn_predict(nn, input)) return 1;
+	if(nn_predict(nn, input, dropout)) return 1;
 
 	int batch_flag = ((nn->tail->output->y) > (1)) ? 1 : 0;
 	
@@ -220,6 +238,11 @@ nn_batch_backpropagation(struct nn_array *nn, const matrix_t * input,
 	//layer_delta = layer_delta o activation_func(layer_output)
 		if(nn_ptr->activation_func != NULL) nn_hadamard(nn_ptr);
 
+	//layer_delta = layer_delta o dropout_mask
+		if(dropout && nn_ptr->dropout_mask != NULL)
+			matrix_hadamard(*nn_ptr->delta,
+					*nn_ptr->dropout_mask,
+					nn_ptr->delta);
 		nn_ptr = nn_ptr->prev;
 	} while(nn_ptr != NULL);
 

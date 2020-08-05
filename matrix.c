@@ -124,7 +124,7 @@ matrix_multiply(const matrix_t a, const matrix_t b, matrix_t *result,
 
 
 int
-matrix_hadamard_product(matrix_t a, matrix_t b, matrix_t *result)
+matrix_hadamard(matrix_t a, matrix_t b, matrix_t *result)
 {
 //walidacja danych
 	if(result == NULL) return 1;

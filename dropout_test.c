@@ -4,13 +4,17 @@
 #include "matrix.h"
 #include "deep_network.h"
 
+//-------------------------------------------------------------------
+//PLIK POMOCNICZY - DO USUNIECIA W KONCOWEJ WERSJI !!!!
+//-------------------------------------------------------------------
+
 int main (void)
 {
 	srand(time(NULL));
 
 	struct nn_array *nn = nn_create();
 
-	nn_add_layer(nn, 3, 3, 4, (ReLU), 0.5);
+	nn_add_layer(nn, 3, 3, 4, NULL, 0.3);
 	matrix_fill(nn->tail->weights, 9,	0.1, 0.2,-0.1,
 					       -0.1, 0.1, 0.9,
 						0.1, 0.4, 0.1);
@@ -30,7 +34,10 @@ int main (void)
 				0.1, 1.0, 0.2);
 
 
-	nn_batch_backpropagation(nn, a, b, 0.01);
+	nn_predict(nn, a, 1);	//DEBUG
+	nn_backpropagation(nn, a, b, 0.01, 1);
+
+	nn_display(nn);
 
 	matrix_free(a);
 	matrix_free(b);
