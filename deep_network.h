@@ -23,6 +23,8 @@ struct nn_layer {
 
  	matrix_t *delta;
 	matrix_t *weight_delta;
+	matrix_t *dropout_mask;
+	double dropout_rate;
 
 	void (*activation_func)(double *, unsigned);
 
@@ -48,7 +50,7 @@ struct nn_layer * nn_layer_create(unsigned x, unsigned y, unsigned batch_size);
 //<batch_size> okresla ilosc danych w serii
 //zwraca 0 w przypadku porazki, w innym przypadku 1
 int nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
-	unsigned batch_size, void (*activation_func)(double *, unsigned));
+unsigned batch_size, void (*activation_func)(double *, unsigned), double dropout);
 
 //zwalnia cala pamiec przydzielona na strukture <nn>
 void nn_free(struct nn_array *nn);

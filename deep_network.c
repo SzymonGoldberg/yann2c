@@ -43,7 +43,7 @@ nn_layer_create(unsigned x, unsigned y, unsigned batch_size)
 
 int
 nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
-	unsigned batch_size, void (*activation_func)(double *, unsigned))
+	unsigned batch_size, void (*activation_func)(double *, unsigned), double dropout)
 {
 	if(nn == NULL) return 1;
 
@@ -62,6 +62,38 @@ nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
 		if(new_layer == NULL) return 1;
 		nn->tail->next = new_layer;
 		new_layer->prev = nn->tail;
+	}
+
+//czesc funkcji odpowiadajaca za maske dropout
+	if(dropout > 0.0)
+	{
+	//alokacja
+		new_layer->dropout_mask = matrix_alloc(new_layer->output->x,
+							new_layer->output->y);
+		if(new_layer->dropout_mask == NULL) {
+			nn->tail = new_layer;
+			return 1;
+		}
+		int size = (new_layer->output->x * new_layer->output->y);
+
+	//aux = liczba neuronow do wylaczenia
+		int aux = size * dropout;
+		new_layer->dropout_rate =  ((double)(aux) / (size));
+
+	//zapelniam dropout_mask jedynkami
+		for(int i = 0; i < size; ++i)
+			new_layer->dropout_mask->matrix[i] = 1;
+
+	//losuje komorki macierzy ktore wyzeruje
+		int random;
+		do {
+			random = rand()%size;
+			if(new_layer->dropout_mask->matrix[random])
+			{
+				new_layer->dropout_mask->matrix[random] = 0;
+				aux--;
+			}
+		} while( aux != 0);
 	}
 	nn->tail = new_layer;
 	nn->tail->activation_func = activation_func;
