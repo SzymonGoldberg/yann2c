@@ -237,27 +237,27 @@ int main (void)
 
 	puts("TEST 13 ---nn_add_layer---");
 
-	aux = nn_add_layer(NULL, 3, 3, 1, NULL);
+	aux = nn_add_layer(NULL, 3, 3, 1, NULL, 0.0);
 	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
 	else puts("=== OK! ===");
 
 
 	puts("TEST 14 ---nn_add_layer---");
 
-	aux = nn_add_layer(nn, 0, 3, 1, NULL);
+	aux = nn_add_layer(nn, 0, 3, 1, NULL, 0);
 	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
 	else puts("=== OK! ===");
 
 	puts("TEST 15 ---nn_add_layer---");
 
-	aux = nn_add_layer(nn, 3, 0, 1, NULL);
+	aux = nn_add_layer(nn, 3, 0, 1, NULL, 0);
 	if(!aux) printf("---Funkcja powinna zwrocic 1 a zwrocila %i\n", aux);
 	else puts("=== OK! ===");
 
 
 	puts("TEST 16 ---nn_add_layer---");
 
-	aux = nn_add_layer(nn, 3, 3, 1, NULL);
+	aux = nn_add_layer(nn, 3, 3, 1, NULL, 0.0);
 	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
 	else puts("=== OK! ===");
 
@@ -271,7 +271,7 @@ int main (void)
  	matrix_t *input0 = matrix_alloc(3, 1);
 	matrix_fill(input0, 3, 8.5, 0.65, 1.2);
 
-	nn_predict(nn, input0);
+	nn_predict(nn, input0, 0);
 	double exp_predict0[] = {0.555, 0.98, 0.965};
 
 	err = 0;
@@ -297,12 +297,12 @@ int main (void)
 	matrix_fill(nn->tail->weights, 9,	0.1, 0.2,-0.1,
 					       -0.1, 0.1, 0.9,
 				       		0.1, 0.4, 0.1);
-	aux = nn_add_layer(nn, 3, 3, 1, NULL);
+	aux = nn_add_layer(nn, 3, 3, 1, NULL, 0.0);
 
 	matrix_fill(nn->tail->weights, 9,	0.3, 1.1,-0.3,
 					      	0.1, 0.2, 0.0,
 				       		0.0, 1.3, 0.1);
-	nn_predict(nn, input0);
+	nn_predict(nn, input0, 0);
 
 	double exp_predict1[] = {0.2135, 0.145, 0.5065};
 	err = 0;
@@ -370,25 +370,25 @@ int main (void)
 	nn_free(nn);
 
 
-	puts("TEST 20 ---nn_batch_backpropagation---");
+	puts("TEST 20 ---nn_backpropagation---");
 
 	nn = nn_create();
 
-	nn_add_layer(nn, 1, 1, 1, NULL);
+	nn_add_layer(nn, 1, 1, 1, NULL, 0.0);
 	matrix_fill(nn->tail->weights, 1, 0.1);
 
-	nn_add_layer(nn, 1, 1, 1, NULL);
+	nn_add_layer(nn, 1, 1, 1, NULL, 0.0);
 	matrix_fill(nn->tail->weights, 1, 0.3);
 
 	a = matrix_alloc(1, 1);
 	matrix_fill(a, 1, 8.5);
 
-	nn_predict(nn, a);
+	nn_predict(nn, a, 0);
 
 	b = matrix_alloc(1, 1);
 	matrix_fill(b, 1, 0.1);
 
-	aux = nn_batch_backpropagation(nn, a, b, 0.01);
+	aux = nn_backpropagation(nn, a, b, 0.01, 0);
 	
 	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
 
@@ -415,14 +415,14 @@ int main (void)
 	matrix_free(b);
 
 
-	puts("TEST 21 ---matrix_hadamard_product---");
+	puts("TEST 21 ---matrix_hadamard---");
 
 
 	a = matrix_alloc(3, 1);
 	b = matrix_alloc(2, 1);
 	c = matrix_alloc(3, 1);
 
-        aux = matrix_hadamard_product(*a, *b, c);
+        aux = matrix_hadamard(*a, *b, c);
 
 	if(!aux) puts("---Funkcja powinna zwrocic 1 a zwrocila 0");
 	else	puts("=== OK! ===");
@@ -430,14 +430,14 @@ int main (void)
 	matrix_free(b);
 
 
-	puts("TEST 22 ---matrix_hadamard_product---");
+	puts("TEST 22 ---matrix_hadamard---");
 
 	b = matrix_alloc(3, 1);
 
 	matrix_fill(a, 3, 1.0, 2.0, 3.0);
 	matrix_fill(b, 3, 5.0, 5.0, 5.0);
 
-	aux = matrix_hadamard_product(*a, *b, c);
+	aux = matrix_hadamard(*a, *b, c);
 	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
 
 	double exp_multiply3[] = {5.0, 10.0, 15.0};
@@ -465,14 +465,14 @@ int main (void)
 	matrix_free(c);
 	nn_free(nn);
 
-	puts("TEST 23 ---nn_batch_backpropagation---(z funkcja aktywacji)");
+	puts("TEST 23 ---nn_backpropagation---(z funkcja aktywacji)");
 
 	nn = nn_create();
 
-	nn_add_layer(nn, 3, 1, 1, (ReLU));
+	nn_add_layer(nn, 3, 1, 1, (ReLU), 0.0);
 	matrix_fill(nn->tail->weights, 3, 0.1, -0.1, 0.1);
 
-	nn_add_layer(nn, 1, 0, 1, NULL);
+	nn_add_layer(nn, 1, 0, 1, NULL, 0.0);
 	matrix_fill(nn->tail->weights, 3, 0.3, 1.1, -0.3);
 
 	a = matrix_alloc(1, 1);
@@ -481,7 +481,7 @@ int main (void)
 	b = matrix_alloc(1, 1);
 	b->matrix[0] = 0.1;
 
-	nn_batch_backpropagation(nn, a, b, 0.01);
+	nn_backpropagation(nn, a, b, 0.01, 0);
 
 	double exp_weights1[] = {0.30085, 1.1, -0.29915};
 
@@ -521,15 +521,15 @@ int main (void)
 	matrix_free(a);
 	matrix_free(b);
 
-	puts("TEST 24 ---nn_batch_backpropagation---(z funkcja aktywacji)");
+	puts("TEST 24 ---nn_backpropagation---(z funkcja aktywacji)");
 
 	nn = nn_create();
 
-	nn_add_layer(nn, 3, 3, 1, (ReLU));
+	nn_add_layer(nn, 3, 3, 1, (ReLU), 0.0);
 	matrix_fill(nn->tail->weights, 9,	0.1, 0.2,-0.1,
 					       -0.1, 0.1, 0.9,
 						0.1, 0.4, 0.1);
-	nn_add_layer(nn, 3, 3, 1, NULL);
+	nn_add_layer(nn, 3, 3, 1, NULL, 0.0);
 	matrix_fill(nn->tail->weights, 9,	0.3, 1.1,-0.3,
 					       	0.1, 0.2, 0.0,
 						0.0, 1.3, 0.1);
@@ -539,7 +539,7 @@ int main (void)
 	b = matrix_alloc(3, 1);
 	matrix_fill(b, 3, 0.1, 1.0, 0.1);
 
-	nn_batch_backpropagation(nn, a, b, 0.01);
+	nn_backpropagation(nn, a, b, 0.01, 0);
 	
 	double exp_weights3[] = {0.299024, 1.09967, -0.301396,
 				0.107353, 0.202522, 0.0105165,
@@ -587,11 +587,11 @@ int main (void)
 
 	nn = nn_create();
 
-	nn_add_layer(nn, 3, 3, 4, (ReLU));
+	nn_add_layer(nn, 3, 3, 4, (ReLU), 0.0);
 	matrix_fill(nn->tail->weights, 9,	0.1, 0.2,-0.1,
 					       -0.1, 0.1, 0.9,
 						0.1, 0.4, 0.1);
-	nn_add_layer(nn, 3, 3, 4, NULL);
+	nn_add_layer(nn, 3, 3, 4, NULL, 0.0);
 	matrix_fill(nn->tail->weights, 9,	0.3, 1.1,-0.3,
 					       	0.1, 0.2, 0.0,
 						0.0, 1.3, 0.1);
@@ -605,7 +605,7 @@ int main (void)
 				0.98, 0.3, 1.4,
 				1.1, 0.0, 1.36,
 				0.98, 0.0899999, 1.36};
-	nn_predict(nn, a);
+	nn_predict(nn, a, 0);
 
 	err = 0;
  	for(int i = 0; i < 12; ++i)
@@ -694,16 +694,16 @@ int main (void)
 	matrix_free(b);
 	matrix_free(c);
 
-	puts("TEST 26 ---nn_batch_backpropagation---");
+	puts("TEST 26 ---nn_backpropagation---");
 //====TEN TEST JESZCZE NIE DZIALA JAK COS ====
 
 	nn = nn_create();
 
-	nn_add_layer(nn, 3, 3, 4, (ReLU));
+	nn_add_layer(nn, 3, 3, 4, (ReLU), 0.0);
 	matrix_fill(nn->tail->weights, 9,	0.1, 0.2,-0.1,
 					       -0.1, 0.1, 0.9,
 						0.1, 0.4, 0.1);
-	nn_add_layer(nn, 3, 3, 4, NULL);
+	nn_add_layer(nn, 3, 3, 4, NULL, 0.0);
 	matrix_fill(nn->tail->weights, 9,	0.3, 1.1,-0.3,
 					       	0.1, 0.2, 0.0,
 						0.0, 1.3, 0.1);
@@ -719,7 +719,7 @@ int main (void)
 				0.1, 1.0, 0.2);
 
 
-	nn_batch_backpropagation(nn, a, b, 0.01);
+	nn_backpropagation(nn, a, b, 0.01, 0);
 	puts("=== OK! ===");
 
 	matrix_free(a);
