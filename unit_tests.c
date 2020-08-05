@@ -370,7 +370,7 @@ int main (void)
 	nn_free(nn);
 
 
-	puts("TEST 20 ---nn_backpropagation---");
+	puts("TEST 20 ---nn_batch_backpropagation---");
 
 	nn = nn_create();
 
@@ -388,7 +388,7 @@ int main (void)
 	b = matrix_alloc(1, 1);
 	matrix_fill(b, 1, 0.1);
 
-	aux = nn_backpropagation(nn, a, b, 0.01);
+	aux = nn_batch_backpropagation(nn, a, b, 0.01);
 	
 	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
 
@@ -465,7 +465,7 @@ int main (void)
 	matrix_free(c);
 	nn_free(nn);
 
-	puts("TEST 23 ---nn_backpropagation---(z funkcja aktywacji)");
+	puts("TEST 23 ---nn_batch_backpropagation---(z funkcja aktywacji)");
 
 	nn = nn_create();
 
@@ -481,7 +481,7 @@ int main (void)
 	b = matrix_alloc(1, 1);
 	b->matrix[0] = 0.1;
 
-	nn_backpropagation(nn, a, b, 0.01);
+	nn_batch_backpropagation(nn, a, b, 0.01);
 
 	double exp_weights1[] = {0.30085, 1.1, -0.29915};
 
@@ -521,7 +521,7 @@ int main (void)
 	matrix_free(a);
 	matrix_free(b);
 
-	puts("TEST 24 ---nn_backpropagation---(z funkcja aktywacji)");
+	puts("TEST 24 ---nn_batch_backpropagation---(z funkcja aktywacji)");
 
 	nn = nn_create();
 
@@ -539,7 +539,7 @@ int main (void)
 	b = matrix_alloc(3, 1);
 	matrix_fill(b, 3, 0.1, 1.0, 0.1);
 
-	nn_backpropagation(nn, a, b, 0.01);
+	nn_batch_backpropagation(nn, a, b, 0.01);
 	
 	double exp_weights3[] = {0.299024, 1.09967, -0.301396,
 				0.107353, 0.202522, 0.0105165,
@@ -693,6 +693,38 @@ int main (void)
 	matrix_free(a);
 	matrix_free(b);
 	matrix_free(c);
+
+	puts("TEST 26 ---nn_batch_backpropagation---");
+//====TEN TEST JESZCZE NIE DZIALA JAK COS ====
+
+	nn = nn_create();
+
+	nn_add_layer(nn, 3, 3, 4, (ReLU));
+	matrix_fill(nn->tail->weights, 9,	0.1, 0.2,-0.1,
+					       -0.1, 0.1, 0.9,
+						0.1, 0.4, 0.1);
+	nn_add_layer(nn, 3, 3, 4, NULL);
+	matrix_fill(nn->tail->weights, 9,	0.3, 1.1,-0.3,
+					       	0.1, 0.2, 0.0,
+						0.0, 1.3, 0.1);
+	a = matrix_alloc(3, 4);
+	matrix_fill(a, 12,	8.5, 0.65, 1.2,
+				9.5, 0.8, 1.3,
+				9.9, 0.8, 0.5,
+				9.0, 0.9, 1.0);
+	b = matrix_alloc(3, 4);
+	matrix_fill(b, 12,	0.1, 1.0, 0.1,
+				0.0, 1.0, 0.0,
+				0.0, 0.0, 0.1,
+				0.1, 1.0, 0.2);
+
+
+	nn_batch_backpropagation(nn, a, b, 0.01);
+	puts("=== OK! ===");
+
+	matrix_free(a);
+	matrix_free(b);
+	nn_free(nn);
 
 	return 0;
 }

@@ -90,7 +90,7 @@ matrix_multiply(const matrix_t a, const matrix_t b, matrix_t *result,
 	}
 	if(transposed_a && !transposed_b) {
 		if(a.y != b.y) return 2;
-		if(result->x != b.y || result->y != a.x) return 2;
+		if(result->x != b.x || result->y != a.x) return 2;
 	}
 	if(transposed_a && transposed_b) {
 		if(a.y != b.x) return 2;
@@ -108,10 +108,10 @@ matrix_multiply(const matrix_t a, const matrix_t b, matrix_t *result,
 			for(unsigned g = 0; g < aux; ++g)
 			{
 				b_value = transposed_b ? b.matrix[g + x*b.x]
-										:b.matrix[x + g*b.x];
+							:b.matrix[x + g*b.x];
 				
 				a_value = transposed_a ? a.matrix[y + g*a.x]
-										:a.matrix[g + y*a.x];
+							:a.matrix[g + y*a.x];
 				
 				value += a_value * b_value;
 			}

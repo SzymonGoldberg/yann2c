@@ -64,8 +64,8 @@ void nn_display(const struct nn_array *nn);
 //na podstawie <expected_output> modyfikuje wagi poszczegolnych warstw
 //neuronow w sieci <nn>; <input> - macierz wejsciowa, <a> - wspolczynnik uczenia alpha
 //w przypadku sukcesu 0, w innym wypadku 1
-int nn_backpropagation(struct nn_array *nn, const matrix_t * input,
-	const matrix_t* expected_output, double a);
+int nn_batch_backpropagation(struct nn_array *nn, const matrix_t * input,
+	const matrix_t* exp_output, double a);
 
 //---====== DEKLARACJE FUNKCJI AKTYWACJI ======---
 
