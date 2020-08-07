@@ -34,7 +34,7 @@ matrix_alloc(unsigned x, unsigned y)
 void
 matrix_display(const matrix_t a)
 {
-	for(unsigned int i = 0; i < (a.x * a.y); ++i)
+	for(unsigned i = 0; i < (a.x * a.y); ++i)
 	{
 		if(i && !(i % a.x)) printf("\n");
 		printf("%.5lf ", a.matrix[i]);
@@ -53,7 +53,7 @@ matrix_free(matrix_t *a)
 
 
 int
-matrix_fill(matrix_t *a, unsigned int N, ...)
+matrix_fill(matrix_t *a, unsigned N, ...)
 {
 	//sprawdzam poprawnosc danych podanych do funkcji
 	if(a == NULL) return 1;

@@ -29,7 +29,7 @@ nn_layer_create(unsigned x, unsigned y, unsigned batch_size)
 	if(a->weights == NULL) { free(a); return NULL; }
 
 	a->output = matrix_alloc(y, batch_size);
-	if(a->weights == NULL)
+	if(a->output == NULL)
 	{
 		matrix_free(a->weights);
 		free(a);
@@ -64,47 +64,48 @@ nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
 		nn->tail->next = new_layer;
 		new_layer->prev = nn->tail;
 	}
+	nn->tail = new_layer;
+	nn->tail->activation_func = activation_func;
 
 //czesc funkcji odpowiadajaca za maske dropout
 	if(dropout > 0.0)
 	{
-	//alokacja
 		new_layer->dropout_mask = matrix_alloc(new_layer->output->x,
 							new_layer->output->y);
-		if(new_layer->dropout_mask == NULL)
-		{
-			nn->tail = new_layer;
-			return 1;
-		}
-		int size = (new_layer->output->x * new_layer->output->y);
 
-	//aux = liczba neuronow do wylaczenia
-		int aux = size * dropout;
-		new_layer->dropout_rate = 1.0 - ((double)(aux) / (size));
+		if(new_layer->dropout_mask == NULL) return 1;
+
+		int x_drop = new_layer->dropout_mask->x;
+		int dropout_size = x_drop * (new_layer->output->y);
 
 	//zapelniam dropout_mask jedynkami
-		for(int i = 0; i < size; ++i)
+		for(int i = 0; i < dropout_size; ++i)
 			new_layer->dropout_mask->matrix[i] = 1;
 
 	//===============================
 	//PONIZSZY KOD WYKONUJE SIE W NIEDETERMISTYCZNYM CZASIE
 	//DO ZMIANY W KONCOWEJ WERSJI !!!!
 	//===============================
+
+		int aux = round(x_drop * dropout);//ilosc neuronow do wyl
 	
 	//losuje komorki macierzy ktore wyzeruje
 		int random;
-		do {
-			random = rand()%size;
-			if(new_layer->dropout_mask->matrix[random])
+		for(unsigned y = 0; y < new_layer->output->y; ++y)
+		{
+			for(int i = 0; i < aux;)
 			{
-				new_layer->dropout_mask->matrix[random] = 0;
-				aux--;
+				random = rand() % x_drop;
+				if(new_layer->dropout_mask->matrix[random + x_drop*y])
+				{
+					new_layer->dropout_mask->matrix[random + x_drop*y]=0;
+					i++;
+				}
 			}
-		} while( aux != 0);
+		}
+	//dropout_rate = ilosc_neuronow-niedzialajace / ilosc_neuronow
+		new_layer->dropout_rate = (double)(x_drop-aux)/x_drop;
 	}
-	nn->tail = new_layer;
-	nn->tail->activation_func = activation_func;
-
 	return 0;
 }
 
@@ -156,8 +157,11 @@ nn_predict(struct nn_array *nn, const matrix_t *input, char dropout)
 
 	//stosuje funkcje aktywacji na wyjsciu danej warstwy (jesli jakas funkcja jest)
 		if(ptr->activation_func != NULL)
-			for(unsigned i = 0; i < (ptr->output->x) * (ptr->output->y); ++i)
+		{
+			unsigned size = (ptr->output->x) * (ptr->output->y);
+			for(unsigned i = 0; i < size; ++i)
 				(ptr->activation_func)(&(ptr->output->matrix[i]), 0);
+		}
 
 	//stosuje metode dropout jesli jest oznaczona odpowiednia flaga
 		if(dropout && ptr->dropout_mask != NULL)
@@ -185,7 +189,8 @@ nn_hadamard(struct nn_layer *layer)
 	if(layer->activation_func == NULL) return 1;
 
 	double a;
-	for(unsigned i = 0; i < (layer->delta->y) * (layer->delta->x); ++i)
+	unsigned size = (layer->delta->y) * (layer->delta->x);
+	for(unsigned i = 0; i < size ; ++i)
 	{
 		a = layer->output->matrix[i];
 		(layer->activation_func)(&a, 1);
