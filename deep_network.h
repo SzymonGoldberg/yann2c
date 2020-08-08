@@ -74,6 +74,10 @@ void nn_display(const struct nn_array *nn);
 int nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	const matrix_t* exp_output, double a, char dropout);
 
+//TODO
+//>OPIS
+int nn_dropout_reroll(struct nn_array *nn);
+
 //---====== DEKLARACJE FUNKCJI AKTYWACJI ======---
 
 //funkcja poddaje <a> funkcji aktywacji, flaga <derivative> wskazuje czy

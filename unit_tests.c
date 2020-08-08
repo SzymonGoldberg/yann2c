@@ -658,17 +658,17 @@ int main (void)
 	c = matrix_alloc(3, 3);
 
 	matrix_fill(a, 6,	1.0, 2.0, 3.0,
-						4.0, 5.0, 6.0);
+				4.0, 5.0, 6.0);
 
 	matrix_fill(b, 6,	1.0, 24.0,
-						3.0, 6.0,
-						8.0, 12.0);
+				3.0, 6.0,
+				8.0, 12.0);
 
 	aux = matrix_multiply(*a, *b, c, 1, 1);
 
-	double exp_multiply4[] = {97, 27, 56,
-								122, 36, 76, 
-								147, 45, 96};
+	double exp_multiply4[] = {	97, 27, 56,
+					122, 36, 76, 
+					147, 45, 96};
 
 	
 	err = 0;
