@@ -694,8 +694,7 @@ int main (void)
 	matrix_free(b);
 	matrix_free(c);
 
-	puts("TEST 26 ---nn_backpropagation---");
-//====TEN TEST JESZCZE NIE DZIALA JAK COS ====
+	puts("TEST 26 ---nn_backpropagation---(batch, funkcja aktywacji");
 
 	nn = nn_create();
 
@@ -718,9 +717,44 @@ int main (void)
 				0.0, 0.0, 0.1,
 				0.1, 1.0, 0.2);
 
-
 	nn_backpropagation(nn, a, b, 0.01, 0);
-	puts("=== OK! ===");
+
+	double exp_weights5[] = {0.29901, 1.09916, -0.301627,
+				0.123058, 0.205844, 0.0328309,
+				-0.0096053, 1.29716, 0.0863697};
+
+	err = 0;
+	for(int i = 0; i < 9; ++i)
+	{
+		if( nn->tail->weights->matrix[i] > exp_weights5[i] + 0.001 ||
+			nn->tail->weights->matrix[i] < exp_weights5[i] - 0.001)
+		{
+			printf("--powinno byc");
+			printf("%lf a jest %lf\n",exp_weights5[i],
+				nn->tail->weights->matrix[i]);
+			err++;
+		}
+	}
+	if(err) printf("---funkcja zle obliczyla %i wag\n", err);
+	else	printf("=== OK! ===\n");
+
+	double exp_weights6[] = {0.118847, 0.201724, -0.0977926,
+				-0.190674, 0.0930147, 0.886871,
+				0.093963, 0.399449, 0.0994944};
+	err = 0;
+	for(int i = 0; i < 9; ++i)
+	{
+		if( nn->head->weights->matrix[i] > exp_weights6[i] + 0.001 ||
+			nn->head->weights->matrix[i] < exp_weights6[i] - 0.001)
+		{
+			printf("--powinno byc");
+			printf("%lf a jest %lf\n",exp_weights6[i],
+				nn->head->weights->matrix[i]);
+			err++;
+		}
+	}
+	if(err) printf("---funkcja zle obliczyla %i wag\n", err);
+	else	printf("=== OK! ===\n");
 
 	matrix_free(a);
 	matrix_free(b);
