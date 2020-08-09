@@ -160,6 +160,27 @@ nn_predict(struct nn_array *nn, const matrix_t *input, char dropout)
 	if(input == NULL) return 1;
 	if(input->x != nn->head->weights->x) return 1;
 
+//zmieniam rozmiar batcha jesli wejscie jest inne
+	if(input->y != nn->head->output->y)
+	{
+		unsigned old_y = nn->head->output->y;
+		struct nn_layer* ptr = nn->head;
+
+		while(ptr != NULL) {
+			ptr->output->y = input->y;
+			ptr = ptr->next;
+		}
+
+		int ret = nn_predict(nn, input, dropout);
+
+		ptr = nn->head;
+		while(ptr != NULL) {
+			ptr->output->y = old_y;
+			ptr = ptr->next;
+		}
+		return ret;
+	}
+
 	struct nn_layer *ptr = nn->head;
 	do {
  		if(ptr == nn->head) {
@@ -173,7 +194,7 @@ nn_predict(struct nn_array *nn, const matrix_t *input, char dropout)
 					ptr->output, 0, 1);
 		}
 
-	//stosuje funkcje aktywacji na wyjsciu danej warstwy (jesli jakas funkcja jest)
+	//stosuje funkcje aktywacji na wyjsciu danej warstwy (jesli jest)
 		if(ptr->activation_func != NULL)
 		{
 			unsigned size = (ptr->output->x) * (ptr->output->y);
