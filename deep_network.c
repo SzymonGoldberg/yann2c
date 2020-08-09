@@ -228,6 +228,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 //sprawdzanie danych wejsciowych
 	if(nn ==NULL || exp_output == NULL) return 1;
 	if(nn->tail->output->x != exp_output->x) return 1;
+	if(nn->tail->output->y != exp_output->y) return 1;
 
 //nn_predict
 	if(nn_predict(nn, input, dropout)) return 1;
@@ -318,6 +319,28 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 		nn_ptr = nn_ptr->prev;
 	} while(nn_ptr != NULL);
 
+	return 0;
+}
+
+int
+nn_softmax(struct nn_array * nn)
+{
+	if(nn == NULL) return 1;
+
+	double sum = 0;
+	matrix_t* ptr = nn->tail->output;
+	for(unsigned y = 0; y < ptr->y; ++y)
+	{
+		for(unsigned x = 0; x < ptr->x; ++x)
+		{
+			sum += exp(ptr->matrix[x + ptr->x*y]);
+		}
+		for(unsigned x = 0; x < ptr->x; ++x)
+		{
+			ptr->matrix[x + ptr->x*y] = exp(ptr->matrix[x + ptr->x*y])/sum;
+		}
+		sum = 0;
+	}
 	return 0;
 }
 

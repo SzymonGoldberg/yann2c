@@ -78,6 +78,10 @@ int nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 //>OPIS
 int nn_dropout_reroll(struct nn_array *nn);
 
+//TODO
+//>OPIS
+int nn_softmax(struct nn_array * nn);
+
 //---====== DEKLARACJE FUNKCJI AKTYWACJI ======---
 
 //funkcja poddaje <a> funkcji aktywacji, flaga <derivative> wskazuje czy
