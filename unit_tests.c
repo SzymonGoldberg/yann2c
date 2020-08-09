@@ -388,7 +388,7 @@ int main (void)
 	b = matrix_alloc(1, 1);
 	matrix_fill(b, 1, 0.1);
 
-	aux = nn_backpropagation(nn, a, b, 0.01, 0);
+	aux = nn_backpropagation(nn, a, b, 0.01, 0, 0);
 	
 	if(aux) printf("---Funkcja powinna zwrocic 0 a zwrocila %i\n", aux);
 
@@ -481,7 +481,7 @@ int main (void)
 	b = matrix_alloc(1, 1);
 	b->matrix[0] = 0.1;
 
-	nn_backpropagation(nn, a, b, 0.01, 0);
+	nn_backpropagation(nn, a, b, 0.01, 0, 0);
 
 	double exp_weights1[] = {0.30085, 1.1, -0.29915};
 
@@ -539,7 +539,7 @@ int main (void)
 	b = matrix_alloc(3, 1);
 	matrix_fill(b, 3, 0.1, 1.0, 0.1);
 
-	nn_backpropagation(nn, a, b, 0.01, 0);
+	nn_backpropagation(nn, a, b, 0.01, 0, 0);
 	
 	double exp_weights3[] = {0.299024, 1.09967, -0.301396,
 				0.107353, 0.202522, 0.0105165,
@@ -717,7 +717,7 @@ int main (void)
 				0.0, 0.0, 0.1,
 				0.1, 1.0, 0.2);
 
-	nn_backpropagation(nn, a, b, 0.01, 0);
+	nn_backpropagation(nn, a, b, 0.01, 0, 0);
 
 	double exp_weights5[] = {0.29901, 1.09916, -0.301627,
 				0.123058, 0.205844, 0.0328309,

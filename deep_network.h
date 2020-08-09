@@ -71,8 +71,11 @@ void nn_display(const struct nn_array *nn);
 //neuronow w sieci <nn>; <input> - macierz wejsciowa, <a> - wspolczynnik uczenia alpha
 //<dropout> - flaga wskazuje czy korzystac z metody uczenia dropout
 //w przypadku sukcesu 0, w innym wypadku 1
+//jesli obawiasz sie ze Twoje obliczenia moga potrwac dlugo mozesz ustawic
+//flage <verbose> na 1, wtedy program bedzie wraz z dzialaniem wyswietlal
+//komunikaty tekstowe
 int nn_backpropagation(struct nn_array *nn, const matrix_t * input,
-	const matrix_t* exp_output, double a, char dropout);
+	const matrix_t* exp_output, double a, char dropout, char verbose);
 
 //TODO
 //>OPIS

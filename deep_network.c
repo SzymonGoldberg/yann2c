@@ -223,7 +223,7 @@ nn_hadamard(struct nn_layer *layer)
 
 int
 nn_backpropagation(struct nn_array *nn, const matrix_t * input,
-	const matrix_t* exp_output, double a, char dropout)
+	const matrix_t* exp_output, double a, char dropout, char verbose)
 {
 //sprawdzanie danych wejsciowych
 	if(nn ==NULL || exp_output == NULL) return 1;
@@ -242,6 +242,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	if(nn_ptr->delta == NULL)
 	{
 		do {
+			if(verbose) puts("ALLOCATING MEMORY(DELTA)");
 			nn_ptr->delta = ((nn_ptr) == (nn->tail)) ?
 				matrix_alloc(exp_output->x, exp_output->y):
 				matrix_alloc(nn_ptr->next->weights->x,
@@ -253,6 +254,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 
 //obliczanie delty dla poszczegolnych warstw
 	do {
+		if(verbose) puts("COUNTING DELTA");
 		if(nn_ptr == nn->tail)
 		//last_layer_delta = layer_output - expeced_output
 			matrix_substraction(*(nn_ptr->output),
@@ -277,6 +279,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 	if(nn_ptr->weight_delta == NULL)
 	{
 		do {
+			if(verbose) puts("ALLOCATING MEMORY (WEIGHT_DELTA)");
 			nn_ptr->weight_delta = ((nn_ptr) == (nn->head)) ?
 				matrix_alloc(input->x, nn_ptr->delta->x):
 			matrix_alloc(nn_ptr->prev->output->x, nn_ptr->delta->x);
@@ -288,6 +291,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 
 //obliczanie delty wag dla poszczegolnych warstw i ew zmiana wartosci wag
 	do {
+		if(verbose) puts("CALCULATING WEIGHT_DELTA");
 		if(nn_ptr == nn->head) {
 			if(batch_flag)
 			//layer_weight_delta = layer_delta^T * batch_input 
