@@ -161,7 +161,7 @@ nn_predict(struct nn_array *nn, const matrix_t *input, char dropout)
 	if(input->x != nn->head->weights->x) return 1;
 
 //zmieniam rozmiar batcha jesli wejscie jest inne
-	if(input->y != nn->head->output->y)
+	if(input->y < nn->head->output->y)
 	{
 		unsigned old_y = nn->head->output->y;
 		struct nn_layer* ptr = nn->head;
