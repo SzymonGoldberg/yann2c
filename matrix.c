@@ -205,7 +205,7 @@ matrix_compare_max_value_index(const matrix_t* a, const matrix_t* b)
 				max_a = x;
 
 		for(unsigned x = 0; x < a->x; ++x)
-			if(b->matrix[x + y*a->x] > b->matrix[max_a + y*a->x])
+			if(b->matrix[x + y*a->x] > b->matrix[max_b + y*a->x])
 				max_b = x;
 
 		if(max_a != max_b) ++counter;
