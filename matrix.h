@@ -65,6 +65,10 @@ int matrix_multiply_by_num(matrix_t *a, const double b);
 //nowa macierz ktora wpisuje do <result> w przypadku sukcesu - 0, porazka - 1
 int outer_product(const matrix_t a, const matrix_t b, matrix_t *result);
 
+//funkcja zwraca ilosc wierszy w ktorych najwyzsza wartosc znajduje sie pod roznym
+//indeksem w macierzach <a> i <b>, w przypadku porazki zwraca -1
+int matrix_compare_max_value_index(const matrix_t* a, const matrix_t* b);
+
 //zwykly append listy, dodaje nowy element z macierza o wielkosci <x,y>
 //na koniec listy (tail) w przypadku sukcesu 0, w przypadku porazki 1
 int matrix_array_append(struct matrix_array * array, unsigned x, unsigned y);

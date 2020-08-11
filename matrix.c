@@ -192,6 +192,27 @@ outer_product(const matrix_t a, const matrix_t b, matrix_t *result)
 	return 0;
 }
 
+int
+matrix_compare_max_value_index(const matrix_t* a, const matrix_t* b)
+{
+	if(a == NULL || b == NULL) return -1;
+	if(a->y != b->y || a->x != b->x) return -1;
+	int counter = 0, max_a = 0, max_b = 0;
+	for(unsigned y = 0; y < a->y; ++y)
+	{
+		for(unsigned x = 0; x < a->x; ++x)
+			if(a->matrix[x + y*a->x] > a->matrix[max_a + y*a->x])
+				max_a = x;
+
+		for(unsigned x = 0; x < a->x; ++x)
+			if(b->matrix[x + y*a->x] > b->matrix[max_a + y*a->x])
+				max_b = x;
+
+		if(max_a != max_b) ++counter;
+	}
+ 	return counter;       
+}
+
 //======= FUNKCJE DO LISTY MACIERZY =======
 
 
