@@ -344,6 +344,7 @@ nn_backpropagation(struct nn_array *nn, const matrix_t * input,
 		nn_ptr = nn_ptr->prev;
 	} while(nn_ptr != NULL);
 
+	if(verbose) puts("DONE!");
 	return 0;
 }
 
@@ -357,14 +358,61 @@ nn_softmax(struct nn_array * nn)
 	for(unsigned y = 0; y < ptr->y; ++y)
 	{
 		for(unsigned x = 0; x < ptr->x; ++x)
-		{
 			sum += exp(ptr->matrix[x + ptr->x*y]);
-		}
+
 		for(unsigned x = 0; x < ptr->x; ++x)
-		{
 			ptr->matrix[x + ptr->x*y] = exp(ptr->matrix[x + ptr->x*y])/sum;
-		}
 		sum = 0;
+	}
+	return 0;
+}
+
+
+//NOT DONE YET!
+int
+nn_write(const struct nn_array *nn, const char* filename)
+{
+	if(nn == NULL || filename == NULL) return 1;
+	FILE *f = fopen(filename, "wb");
+	if(f == NULL) return 1;
+	
+	struct nn_layer* ptr = nn->head;
+	int size, aux;
+	while(ptr != NULL)
+	{
+		size = matrix_size(ptr->weights);
+
+		aux = fwrite(&size, sizeof(int), 1, f);
+		if(aux != 1) { fclose(f); return 1; }
+
+		aux = fwrite(ptr->weights->matrix, sizeof(double), size, f);
+		if(aux != size) { fclose(f); return 1; }
+
+		ptr = ptr->next;
+	}
+	return 0;
+}
+
+
+//NOT DONE YET!
+int
+nn_read(struct nn_array *nn, const char* filename)
+{
+	if(nn == NULL || filename == NULL) return 1;
+	FILE *f = fopen(filename, "rb");
+	if(f == NULL) return 1;
+
+	struct nn_layer* ptr = nn->head;
+	int size, aux;
+	while(ptr != NULL)
+	{
+		aux = fread(&size, sizeof(int), 1, f);
+		if(aux != 1) { fclose(f); return 1; }
+		
+		aux = fread(ptr->weights->matrix, sizeof(double), size, f);
+		if(aux != size) { fclose(f); return 1; }
+
+		ptr = ptr->next;
 	}
 	return 0;
 }
