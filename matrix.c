@@ -213,6 +213,9 @@ matrix_compare_max_value_index(const matrix_t* a, const matrix_t* b)
  	return counter;       
 }
 
+int
+matrix_size(const matrix_t* a) { return (a == NULL) ? (-1) : ((a->x) * (a->y)); }
+
 //======= FUNKCJE DO LISTY MACIERZY =======
 
 

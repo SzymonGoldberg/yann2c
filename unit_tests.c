@@ -825,6 +825,20 @@ int main (void)
 	matrix_free(a);
 	nn_free(nn);
 
+	puts("TEST 28 ---matrix_size---");
+
+	aux = matrix_size(NULL);
+	if(aux != -1)	printf("Powinna zwrocic -1 a zwrocila %i\n", aux);
+	else		puts("=== OK! ===");
+
+	puts("TEST 29 ---matrix_size---");
+
+	a = matrix_alloc(3, 4);
+	aux = matrix_size(a);
+	if(aux != 12)	printf("Powinna zwrocic 12 a zwrocila %i\n", aux);
+	else		puts("=== OK! ===");
+
+	matrix_free(a);
 
 	return 0;
 }
