@@ -89,6 +89,8 @@ int nn_read(struct nn_array *nn, const char* filename);
 
 int nn_write(const struct nn_array *nn, const char* filename);
 
+void nn_fill_rng(struct nn_array *nn, double min, double max);
+
 //---====== DEKLARACJE FUNKCJI AKTYWACJI ======---
 
 //funkcja poddaje <a> funkcji aktywacji, flaga <derivative> wskazuje czy

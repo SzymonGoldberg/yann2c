@@ -417,6 +417,19 @@ nn_read(struct nn_array *nn, const char* filename)
 	return 0;
 }
 
+void
+nn_fill_rng(struct nn_array *nn, double min, double max)
+{
+	if(nn == NULL) return;
+	struct nn_layer* ptr = nn->head;
+	while(ptr != NULL)
+	{
+		if(ptr->weights != NULL)
+			matrix_fill_rng(ptr->weights, min, max);
+		ptr = ptr->next;
+	}
+}
+
 //---======= FUNKCJE AKTYWACJI =======---
 
 void

@@ -55,14 +55,11 @@ matrix_free(matrix_t *a)
 int
 matrix_fill(matrix_t *a, unsigned N, ...)
 {
-	//sprawdzam poprawnosc danych podanych do funkcji
 	if(a == NULL) return 1;
-	if(N > ((*a).x * (*a).y)) return 1;
+	if((int)N > matrix_size(a)) return 1;
 
-	//lista
 	va_list list;
 	va_start(list, N);
-
 
 	//petla wpisujaca argumenty do macierzy
 	for(unsigned i = 0; i < N; ++i)
@@ -132,7 +129,7 @@ matrix_hadamard(matrix_t a, matrix_t b, matrix_t *result)
 	if(result->x != b.x || result->y != b.y) return 2;
 
 //mnozenie macierzy
-	for(unsigned i = 0; i < (result->x) * (result->y); ++i)
+	for(int i = 0; i < matrix_size(result); ++i)
 		result->matrix[i] = a.matrix[i] * b.matrix[i];
 	return 0;
 }
@@ -142,7 +139,7 @@ void
 matrix_fill_rng(matrix_t * a, double min, double max)
 {
 	double f;
- 	for(unsigned i = 0; i < (a->x) * (a->y); ++i)
+ 	for(int i = 0; i < matrix_size(a); ++i)
 	{
 		f = (double) rand() / RAND_MAX;
 		(*a).matrix[i] = min + f * (max - min);
@@ -159,7 +156,7 @@ matrix_substraction(const matrix_t a, const matrix_t b, matrix_t *result)
 	if(a.x != result->x || a.y != result->y) return 1;
 
 //odejmowanie
- 	for(unsigned i = 0; i < (a.x) * (a.y); ++i)
+ 	for(int i = 0; i < matrix_size(&a); ++i)
  		(*result).matrix[i] = a.matrix[i] - b.matrix[i];            
 
 	return 0;
