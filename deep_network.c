@@ -90,7 +90,7 @@ nn_add_layer(struct nn_array *nn, unsigned size, unsigned input,
 	unsigned batch_size, void (*activation_func)(double *, unsigned), double dropout)
 {
 	if(nn == NULL) return 1;
-	if(dropout >= 1.0) return 1;
+	if(dropout >= 1.0 || batch_size < 1) return 1;
 
   	struct nn_layer *new_layer;
 	if(nn->tail == NULL)
@@ -139,13 +139,12 @@ nn_free(struct nn_array *nn)
 	do {
 		ptr = aux->next;
 
-		if(aux->weights != NULL) matrix_free(aux->weights);
-		if(aux->output != NULL) matrix_free(aux->output);
-		if(aux->delta != NULL) matrix_free(aux->delta);
+		if(aux->weights != NULL)	matrix_free(aux->weights);
+		if(aux->output != NULL) 	matrix_free(aux->output);
+		if(aux->delta != NULL) 		matrix_free(aux->delta);
 		if(aux->dropout_mask != NULL) matrix_free(aux->dropout_mask);
 		if(aux->weight_delta != NULL) matrix_free(aux->weight_delta);
 		free(aux);
-
 		aux = ptr;
 	} while(ptr != NULL);
 
@@ -181,14 +180,16 @@ nn_predict(struct nn_array *nn, const matrix_t *input, char dropout)
 		return ret;
 	}
 
+//losuje ponownie wartosci w dropout_mask
+	if(dropout) nn_dropout_reroll(nn);
+
 	struct nn_layer *ptr = nn->head;
 	do {
  		if(ptr == nn->head) {
 			matrix_multiply( *input,
 					*(ptr->weights),
 					ptr->output, 0, 1);
-		}
-		else {
+		} else {
                  	matrix_multiply(*(ptr->prev->output),
 					*(ptr->weights),
 					ptr->output, 0, 1);
@@ -205,9 +206,6 @@ nn_predict(struct nn_array *nn, const matrix_t *input, char dropout)
 	//stosuje metode dropout jesli jest oznaczona odpowiednia flaga
 		if(dropout && ptr->dropout_mask != NULL)
 		{
-		//losuje ponownie wartosci w dropout_mask
-			nn_dropout_reroll(nn);
-
 		//values = values * dropout mask
 			matrix_hadamard(*ptr->output, *ptr->dropout_mask, ptr->output);
 
@@ -390,6 +388,7 @@ nn_write(const struct nn_array *nn, const char* filename)
 
 		ptr = ptr->next;
 	}
+	fclose(f);
 	return 0;
 }
 
@@ -407,13 +406,14 @@ nn_read(struct nn_array *nn, const char* filename)
 	while(ptr != NULL)
 	{
 		aux = fread(&size, sizeof(int), 1, f);
-		if(aux != 1) { fclose(f); return 1; }
+		if(aux != 1) { fclose(f); return 2; }
 		
 		aux = fread(ptr->weights->matrix, sizeof(double), size, f);
-		if(aux != size) { fclose(f); return 1; }
+		if(aux != size) { fclose(f); return 2; }
 
 		ptr = ptr->next;
 	}
+	fclose(f);
 	return 0;
 }
 

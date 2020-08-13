@@ -85,6 +85,10 @@ int nn_dropout_reroll(struct nn_array *nn);
 //>OPIS
 int nn_softmax(struct nn_array * nn);
 
+int nn_read(struct nn_array *nn, const char* filename);
+
+int nn_write(const struct nn_array *nn, const char* filename);
+
 //---====== DEKLARACJE FUNKCJI AKTYWACJI ======---
 
 //funkcja poddaje <a> funkcji aktywacji, flaga <derivative> wskazuje czy

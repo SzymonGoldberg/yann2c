@@ -665,6 +665,8 @@ int main (void)
 				8.0, 12.0);
 
 	aux = matrix_multiply(*a, *b, c, 1, 1);
+	if(aux)	printf("Powinna zwrocic 0 a zwrocila %i\n", aux);
+	else		puts("=== OK! ===");
 
 	double exp_multiply4[] = {	97, 27, 56,
 					122, 36, 76, 
@@ -840,5 +842,61 @@ int main (void)
 
 	matrix_free(a);
 
+	puts("TEST 30 ---nn_write---");
+
+	nn = nn_create();
+              //	network		size	input	batch	act func	dropout
+	nn_add_layer(	nn,		3, 	4, 	1, 	NULL,		0.0);
+	nn_add_layer(	nn,		3,	0,	1,	NULL,		0.0);
+
+	double exp_weights7[] = { 	12.0,	2.0,	3.0,
+					32.0,	5.0,	8.0,
+					85.0,	3.5,	6.7,
+					91.0,	9.0,	0.0};
+	
+	double exp_weights8[] = { 	2.3,	2.0,	3.0,
+					2.0,	5.0,	8.0,
+					1.0,	9.0,	0.0};
+	for(int i = 0; i < 12; ++i)
+		nn->head->weights->matrix[i] = exp_weights7[i];
+
+	for(int i = 0; i < 9; ++i)
+		nn->tail->weights->matrix[i] = exp_weights8[i];
+
+	aux = nn_write(nn, "test_nn_file.bin");
+	if(aux)	printf("Powinna zwrocic 0 a zwrocila %i\n", aux);
+	else		puts("=== OK! ===");
+
+	nn_free(nn);
+
+	puts("TEST 31 ---nn_read---");
+
+	struct nn_array* dn = nn_create();
+
+              //	network		size	input	batch	act func	dropout
+	nn_add_layer(	dn,		3, 	4, 	1, 	NULL,		0.0);
+	nn_add_layer(	dn,		3,	0,	0,	NULL,		0.0);
+
+	aux = nn_read(dn, "test_nn_file.bin");
+	if(aux)	printf("Powinna zwrocic 0 a zwrocila %i\n", aux);
+	else		puts("=== OK! ===");
+
+	err = 0;
+	for(int i = 0; i < 12; ++i)
+	{
+		if(	dn->head->weights->matrix[i] > exp_weights7[i] + 0.001 ||
+			dn->head->weights->matrix[i] < exp_weights7[i] - 0.001)
+		{
+			printf("--powinno byc");
+			printf("%lf a jest %lf\n",exp_weights7[i],
+				dn->head->weights->matrix[i]);
+			err++;
+		}
+	}
+	if(err) printf("---funkcja zle obliczyla %i wag\n", err);
+	else	printf("=== OK! ===\n");
+
+
+	nn_free(dn);
 	return 0;
 }
