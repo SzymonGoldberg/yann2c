@@ -896,7 +896,41 @@ int main (void)
 	if(err) printf("---funkcja zle obliczyla %i wag\n", err);
 	else	printf("=== OK! ===\n");
 
-
 	nn_free(dn);
+
+	puts("TEST 32 ---matrix_resize---");
+
+	a = matrix_alloc(2, 3);
+	aux = matrix_resize(a, 3, 3);
+	if(aux != 1)	printf("Powinna zwrocic 1 a zwrocila %i\n", aux);
+	else		puts("=== OK! ===");
+
+	puts("TEST 33 ---matrix_resize---");
+
+	double tab2[] = {1, 5, 0.3,
+			 3, 4, 5.4};
+
+	for(int i = 0; i < 6; ++i)
+		a->matrix[i] = tab2[i];
+
+	aux = matrix_resize(a, 3, 2);
+	if(aux)		printf("Powinna zwrocic 1 a zwrocila %i\n", aux);
+	else		puts("=== OK! ===");
+
+	err = 0;
+	for(int i = 0; i < 6; ++i)
+	{
+		if(a->matrix[i] != tab2[i])
+		{
+			printf("--powinno byc");
+			printf("%lf a jest %lf\n",tab2[i], a->matrix[i]);
+			err++;
+		}
+	}
+	if(err) printf("---funkcja zle obliczyla %i komorek\n", err);
+	else	printf("=== OK! ===\n");
+
+	matrix_free(a);
+
 	return 0;
 }

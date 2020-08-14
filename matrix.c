@@ -213,6 +213,14 @@ matrix_compare_max_value_index(const matrix_t* a, const matrix_t* b)
 int
 matrix_size(const matrix_t* a) { return (a == NULL) ? (-1) : ((a->x) * (a->y)); }
 
+int
+matrix_resize(matrix_t* a, unsigned new_x, unsigned new_y)
+{
+	if(a == NULL) return 1;
+	if((int)(new_y * new_x) != matrix_size(a)) return 1;
+	a->x = new_x; a->y = new_y; return 0;
+}
+
 //======= FUNKCJE DO LISTY MACIERZY =======
 
 
