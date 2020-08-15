@@ -186,7 +186,7 @@ nn_predict(struct nn_array *nn, const matrix_t *input, char dropout)
 	struct nn_layer *ptr = nn->head;
 	do {
  		if(ptr == nn->head) {
-			matrix_multiply( *input,
+			matrix_multiply(*input,
 					*(ptr->weights),
 					ptr->output, 0, 1);
 		} else {
@@ -429,6 +429,46 @@ nn_fill_rng(struct nn_array *nn, double min, double max)
 		ptr = ptr->next;
 	}
 }
+
+//================ FUNKCJE DO CNN ====================================
+
+struct cnn_array*
+cnn_create(void)
+{
+	struct cnn_array*
+		cnn = (struct cnn_array*)calloc(1, sizeof(struct cnn_array));
+	
+	if(cnn != NULL) {cnn->head = NULL; cnn->tail = NULL; }
+	return cnn;
+}
+
+int
+cnn_count_kernel(unsigned input_x, unsigned input_y,
+		unsigned krnl_x, unsigned krnl_y, unsigned stride)
+{
+	int x = 1, y = 1, aux = input_x - krnl_x;
+	double hlp;
+
+	if(aux < 0) return -1;
+	if(aux > 0)
+	{
+		hlp = aux/stride;
+		if(hlp == (double)(int)hlp) x += (int)hlp;
+		else return -1; 
+	}
+
+	aux = input_y - krnl_y;
+	if(aux < 0) return -1;
+	if(aux > 0)
+	{
+		hlp = aux/stride;
+		if(hlp == (double)(int)hlp) y += (int)hlp;
+		else return -1;
+	}
+
+	return x*y;
+}
+
 
 //---======= FUNKCJE AKTYWACJI =======---
 

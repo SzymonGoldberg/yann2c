@@ -6,6 +6,7 @@
 
 int main (void)
 {
+
 //======= TESTY FUNKCJI ALOKUJACEJ PAMIEC NA MACIERZ =======
 	puts("TEST 1 ---matrix_alloc---");
 	matrix_t *a = matrix_alloc(3, 2);

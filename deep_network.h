@@ -37,6 +37,22 @@ struct nn_array {
 	struct nn_layer *tail;
 };
 
+struct cnn_layer {
+	matrix_t *kernel;
+	matrix_t *output;
+	matrix_t *cropped_input;
+
+	void (*activation_func)(double *, unsigned);	//funkcja aktywacji
+
+	struct cnn_layer *next;
+	struct cnn_layer *prev;
+};
+
+struct cnn_array {
+ 	struct cnn_layer* head;
+	struct cnn_layer* tail;
+};
+
 //funkcja tworzy pusta strukture sieci
 //w przypadku sukcesu zwraca jej adres, w innym przypadku zwraca NULL
 struct nn_array * nn_create(void);
@@ -90,6 +106,11 @@ int nn_read(struct nn_array *nn, const char* filename);
 int nn_write(const struct nn_array *nn, const char* filename);
 
 void nn_fill_rng(struct nn_array *nn, double min, double max);
+
+//---====== DEKLARACJE FUNKCJI DO CNN =====---
+
+int cnn_count_kernel(unsigned input_x, unsigned input_y,
+	unsigned krnl_x, unsigned krnl_y, unsigned stride);
 
 //---====== DEKLARACJE FUNKCJI AKTYWACJI ======---
 
