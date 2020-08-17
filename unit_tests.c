@@ -933,5 +933,26 @@ int main (void)
 
 	matrix_free(a);
 
+	puts("TEST 34 ---cnn_create---");
+
+	cnn_layer* cnn = cnn_create(3, 3, NULL, 1);
+
+	if(cnn == NULL)	puts("Powinna zwrocic adres struktury a zwrocila NULL");
+	else		puts("=== OK! ===");
+
+
+	//niedokonczone
+	puts("TEST 35 ---cnn_add_kernel---");
+	
+	matrix_t* kernel =  matrix_alloc(2, 2);
+
+	matrix_fill(kernel, 4, 1.0, 3.0, 8.0, 7.0);
+	cnn_add_kernel(cnn, kernel);
+
+	matrix_fill(kernel, 4, 3.0, 0.2, 3.9, 12.0);
+	cnn_add_kernel(cnn, kernel);
+
+	cnn_free(cnn);
+	matrix_free(kernel);
 	return 0;
 }
