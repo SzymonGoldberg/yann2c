@@ -69,7 +69,7 @@ int outer_product(const matrix_t a, const matrix_t b, matrix_t *result);
 //indeksem w macierzach <a> i <b>, w przypadku porazki zwraca -1
 int matrix_compare_max_value_index(const matrix_t* a, const matrix_t* b);
 
-int matrix_size(const matrix_t* a);
+unsigned matrix_size(const matrix_t* a);
 int matrix_resize(matrix_t* a, unsigned new_x, unsigned new_y);
 
 //zwykly append listy, dodaje nowy element z macierza o wielkosci <x,y>

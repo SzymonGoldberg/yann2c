@@ -37,15 +37,9 @@ struct nn_array {
 	struct nn_layer *tail;
 };
 
-typedef struct {
-	matrix_t *kernels;
-	matrix_t *output;
-	matrix_t *cropped_input;
+//====== CNN ======
 
-	void (*activation_func)(double *, unsigned);	//funkcja aktywacji
-
-	unsigned in_x, in_y, stride;
-} cnn_layer;
+//>TODO
 
 //funkcja tworzy pusta strukture sieci
 //w przypadku sukcesu zwraca jej adres, w innym przypadku zwraca NULL
@@ -106,11 +100,9 @@ void nn_fill_rng(struct nn_array *nn, double min, double max);
 int cnn_count_kernel(unsigned input_x, unsigned input_y,
 	unsigned krnl_x, unsigned krnl_y, unsigned stride);
 
-cnn_layer * cnn_create(	unsigned input_x, unsigned input_y,
-		void (*activation_func)(double *, unsigned), unsigned stride);
-
-int cnn_add_kernel(cnn_layer *cnn, const matrix_t *krnl);
-void cnn_free(cnn_layer* cnn);
+int
+cnn_create_conv_matrix(	const matrix_t* input, const matrix_t* kernel,
+			const matrix_t* output, unsigned stride);
 //---====== DEKLARACJE FUNKCJI AKTYWACJI ======---
 
 //funkcja poddaje <a> funkcji aktywacji, flaga <derivative> wskazuje czy

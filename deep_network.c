@@ -462,94 +462,50 @@ cnn_count_kernel(unsigned input_x, unsigned input_y,
 	return x*y;
 }
 
-
-cnn_layer *
-cnn_create(	unsigned input_x, unsigned input_y,
-		void (*activation_func)(double *, unsigned), unsigned stride)
-{
-	cnn_layer* res =  (cnn_layer *)calloc(1, sizeof(cnn_layer));
-	if(res == NULL) return NULL;
-	res->in_x = input_x;
-	res->in_y = input_y;
-	res->activation_func = activation_func;
-	res->stride = stride;
-
-	return res;
-}
-
 int
-cnn_add_kernel(cnn_layer *cnn, const matrix_t *krnl)
+cnn_create_conv_matrix(	const matrix_t* input, const matrix_t* kernel,
+			const matrix_t* output, unsigned stride)
 {
-	if(cnn == NULL || krnl == NULL) return 1;
+	if(input == NULL || kernel == NULL || output == NULL) return 1;
+	if(output->x != matrix_size(input)) return 1;
+	if(stride < 1) return 1;
 
-	int krnl_amount = cnn_count_kernel(cnn->in_x, cnn->in_y, krnl->x,
-						krnl->y, cnn->stride);
-	int krnl_size = matrix_size(krnl);
-	if(krnl_amount < 1) return 1;
-	if(cnn->kernels == NULL)
+	int krnl_count = cnn_count_kernel(	input->x, input->y, kernel->x,
+						kernel->y, stride);
+
+	if(output->y != (unsigned) krnl_count) return 1;
+	
+	int output_size = matrix_size(output);
+	for(int i = 0; i < output_size; ++i)
+		output->matrix[i] = i;	//DEBUG
+
+	matrix_display(*input);	//DEBUG
+
+	puts(""); //DEBUG
+	int krnl_pos_x = 0, krnl_pos_y = 0;
+	for(int i = 0; i  < krnl_count; ++i)
 	{
-		cnn->kernels = matrix_alloc(krnl_size, 1);
-		if(cnn->kernels == NULL) return 1;
-
-		for(int i = 0; i < krnl_size; ++i)
-			cnn->kernels->matrix[i] = krnl->matrix[i];
-
-		cnn->cropped_input = matrix_alloc(krnl_size, krnl_amount);
-		if(cnn->cropped_input == NULL)
-		{	
-			matrix_free(cnn->kernels);
-			return 1;
-		}
-
-		cnn->output = matrix_alloc(1, krnl_amount);
-		if(cnn->output == NULL)
+		for(unsigned y = krnl_pos_y; y < (kernel->y + krnl_pos_y); ++y)
 		{
-			matrix_free(cnn->kernels);
-			matrix_free(cnn->cropped_input);
-			return 1;
+			for(unsigned x = krnl_pos_x; x < (kernel->x + krnl_pos_x); ++x)
+			{
+				printf("%lf ", input->matrix[x + input->x * y]); //DEBUG
+			}
+			puts(""); //DEBUG
 		}
-	}
-	else
-	{
-		if((int)cnn->kernels->x != krnl_size) return 1;
-		if((int)cnn->cropped_input->y != krnl_amount) return 1;
 
-		matrix_t* krnl_mtrx = matrix_alloc((cnn->kernels->x), (cnn->kernels->y)+1);
-		if(krnl_mtrx == NULL) return 1;
-		
-		int i, curr_krnl_size = matrix_size(cnn->kernels);
+		krnl_pos_x += stride;
 
-		for(i = 0; i < curr_krnl_size; ++i)
-			krnl_mtrx->matrix[i] = cnn->kernels->matrix[i];
-
-		for(int g = 0; g < krnl_size; ++g)
-			krnl_mtrx->matrix[i + g] = krnl->matrix[g];
-
-		matrix_t *out_mtrx = matrix_alloc(cnn->kernels->y,
-				cnn->cropped_input->y);
-
-		if(out_mtrx == NULL) { matrix_free(krnl_mtrx); return 1; }
-
-		matrix_free(cnn->output);
-		matrix_free(cnn->kernels);
-
-		cnn->output = out_mtrx;
-		cnn->kernels= krnl_mtrx;
+		if(krnl_pos_x + kernel->x > input->x)
+		{
+			krnl_pos_x = 0;
+			krnl_pos_y++;
+		}
+		puts(""); //DEBUG
 	}
 
 	return 0;
 }
-
-void
-cnn_free(cnn_layer* cnn)
-{
-	if(cnn == NULL) return;
-	if(cnn->output != NULL) matrix_free(cnn->output);
-	if(cnn->kernels != NULL) matrix_free(cnn->kernels);
-	if(cnn->cropped_input != NULL) matrix_free(cnn->cropped_input);
-	free(cnn);
-}
-
 
 //---======= FUNKCJE AKTYWACJI =======---
 

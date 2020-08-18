@@ -56,7 +56,7 @@ int
 matrix_fill(matrix_t *a, unsigned N, ...)
 {
 	if(a == NULL) return 1;
-	if((int)N > matrix_size(a)) return 1;
+	if(N > matrix_size(a)) return 1;
 
 	va_list list;
 	va_start(list, N);
@@ -129,7 +129,7 @@ matrix_hadamard(matrix_t a, matrix_t b, matrix_t *result)
 	if(result->x != b.x || result->y != b.y) return 2;
 
 //mnozenie macierzy
-	for(int i = 0; i < matrix_size(result); ++i)
+	for(unsigned i = 0; i < matrix_size(result); ++i)
 		result->matrix[i] = a.matrix[i] * b.matrix[i];
 	return 0;
 }
@@ -139,7 +139,7 @@ void
 matrix_fill_rng(matrix_t * a, double min, double max)
 {
 	double f;
- 	for(int i = 0; i < matrix_size(a); ++i)
+ 	for(unsigned i = 0; i < matrix_size(a); ++i)
 	{
 		f = (double) rand() / RAND_MAX;
 		(*a).matrix[i] = min + f * (max - min);
@@ -156,7 +156,7 @@ matrix_substraction(const matrix_t a, const matrix_t b, matrix_t *result)
 	if(a.x != result->x || a.y != result->y) return 1;
 
 //odejmowanie
- 	for(int i = 0; i < matrix_size(&a); ++i)
+ 	for(unsigned i = 0; i < matrix_size(&a); ++i)
  		(*result).matrix[i] = a.matrix[i] - b.matrix[i];            
 
 	return 0;
@@ -210,14 +210,14 @@ matrix_compare_max_value_index(const matrix_t* a, const matrix_t* b)
  	return counter;       
 }
 
-int
+unsigned
 matrix_size(const matrix_t* a) { return (a == NULL) ? (-1) : ((a->x) * (a->y)); }
 
 int
 matrix_resize(matrix_t* a, unsigned new_x, unsigned new_y)
 {
 	if(a == NULL) return 1;
-	if((int)(new_y * new_x) != matrix_size(a)) return 1;
+	if((new_y * new_x) != matrix_size(a)) return 1;
 	a->x = new_x; a->y = new_y; return 0;
 }
 
