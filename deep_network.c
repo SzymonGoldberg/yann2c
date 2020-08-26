@@ -463,11 +463,11 @@ cnn_count_kernel(unsigned input_x, unsigned input_y,
 }
 
 int
-cnn_create_conv_matrix(	const matrix_t* input, const matrix_t* kernel,
+cnn_crop_input(	const matrix_t* input, const matrix_t* kernel,
 			const matrix_t* output, unsigned stride)
 {
 	if(input == NULL || kernel == NULL || output == NULL) return 1;
-	if(output->x != matrix_size(input)) return 1;
+	if(output->x != matrix_size(kernel)) return 1;
 	if(stride < 1) return 1;
 
 	int krnl_count = cnn_count_kernel(	input->x, input->y, kernel->x,
@@ -475,33 +475,21 @@ cnn_create_conv_matrix(	const matrix_t* input, const matrix_t* kernel,
 
 	if(output->y != (unsigned) krnl_count) return 1;
 	
-	int output_size = matrix_size(output);
-	for(int i = 0; i < output_size; ++i)
-		output->matrix[i] = i;	//DEBUG
-
-	matrix_display(*input);	//DEBUG
-
-	puts(""); //DEBUG
-	int krnl_pos_x = 0, krnl_pos_y = 0;
+	int krnl_pos_x = 0, krnl_pos_y = 0, out_x = 0;
 	for(int i = 0; i  < krnl_count; ++i)
 	{
-		for(unsigned y = krnl_pos_y; y < (kernel->y + krnl_pos_y); ++y)
-		{
-			for(unsigned x = krnl_pos_x; x < (kernel->x + krnl_pos_x); ++x)
-			{
-				printf("%lf ", input->matrix[x + input->x * y]); //DEBUG
-			}
-			puts(""); //DEBUG
-		}
-
+		for(unsigned x = krnl_pos_x; x < (kernel->x + krnl_pos_x); ++x)
+			for(unsigned y = krnl_pos_y; y < (kernel->y + krnl_pos_y); ++y)
+				output->matrix[(out_x++) + output->x * i] =
+						input->matrix[x + input->x * y];
 		krnl_pos_x += stride;
 
 		if(krnl_pos_x + kernel->x > input->x)
 		{
 			krnl_pos_x = 0;
 			krnl_pos_y++;
+			out_x = 0;
 		}
-		puts(""); //DEBUG
 	}
 
 	return 0;

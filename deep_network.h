@@ -101,7 +101,7 @@ int cnn_count_kernel(unsigned input_x, unsigned input_y,
 	unsigned krnl_x, unsigned krnl_y, unsigned stride);
 
 int
-cnn_create_conv_matrix(	const matrix_t* input, const matrix_t* kernel,
+cnn_crop_input(	const matrix_t* input, const matrix_t* kernel,
 			const matrix_t* output, unsigned stride);
 //---====== DEKLARACJE FUNKCJI AKTYWACJI ======---
 
