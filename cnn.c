@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "matrix.h"
+#include "deep_network.h"
 #include "cnn.h"
 
 //================ FUNKCJE DO CNN ====================================
@@ -131,6 +132,34 @@ cnn_add_layer(struct cnn_array* cnn, unsigned krnl_x, unsigned krnl_y, unsigned
 	return 0;
 }
 
+int
+cnn_add_fcl(struct cnn_array* cnn, unsigned output_size, void
+		(*activation_func)(double*, unsigned))
+{
+	if(cnn == NULL || !output_size) return 1;
+	if(cnn->fcl != NULL) return 1;
+
+	cnn->fcl = nn_create();
+	if(cnn->fcl == NULL) return 1;
+
+	unsigned input_size = matrix_size(cnn->fcl->tail->output);
+
+	if(nn_add_layer(cnn->fcl, output_size, input_size, 1, activation_func, 0.0))
+	{
+		nn_free(cnn->fcl);
+		return 1;
+	}
+	return 0;
+}
+
+//NOT DONE YET!!!
+int
+cnn_predict(struct cnn_array* cnn, const matrix_t* input)
+{
+	if(cnn == NULL || cnn->tail == NULL) return 1;
+	return 0;
+}
+
 void
 cnn_free_layer(struct cnn_layer* layer)
 {
@@ -142,4 +171,20 @@ cnn_free_layer(struct cnn_layer* layer)
 		if(layer->weight_delta != NULL) matrix_free(layer->weight_delta);
 		free(layer);
 	}
+}
+
+void
+cnn_free(struct cnn_array* cnn)
+{
+	if(cnn == NULL) return;
+	if(cnn->tail == NULL) { free(cnn); return; }
+	
+	struct cnn_layer *ptr = cnn->head;
+	struct cnn_layer *aux = cnn->head;
+	do {
+		ptr = aux->next;
+		cnn_free_layer(aux);
+		aux = ptr;
+	} while(ptr != NULL);
+	free(cnn);
 }

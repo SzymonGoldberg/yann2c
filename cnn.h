@@ -20,6 +20,7 @@ struct cnn_layer {
 struct cnn_array {
 	struct cnn_layer *head;
 	struct cnn_layer *tail;
+	struct nn_array *fcl; //fully connected layers
 
 	unsigned in_x, in_y;
 };
