@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include "matrix.h"
 #include "deep_network.h"
+#include "cnn.h"
 
 int main (void)
 {

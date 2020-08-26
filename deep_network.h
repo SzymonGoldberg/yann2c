@@ -37,9 +37,6 @@ struct nn_array {
 	struct nn_layer *tail;
 };
 
-//====== CNN ======
-
-//>TODO
 
 //funkcja tworzy pusta strukture sieci
 //w przypadku sukcesu zwraca jej adres, w innym przypadku zwraca NULL
@@ -95,14 +92,6 @@ int nn_write(const struct nn_array *nn, const char* filename);
 
 void nn_fill_rng(struct nn_array *nn, double min, double max);
 
-//---====== DEKLARACJE FUNKCJI DO CNN =====---
-
-int cnn_count_kernel(unsigned input_x, unsigned input_y,
-	unsigned krnl_x, unsigned krnl_y, unsigned stride);
-
-int
-cnn_crop_input(	const matrix_t* input, const matrix_t* kernel,
-			const matrix_t* output, unsigned stride);
 //---====== DEKLARACJE FUNKCJI AKTYWACJI ======---
 
 //funkcja poddaje <a> funkcji aktywacji, flaga <derivative> wskazuje czy

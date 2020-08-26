@@ -1,0 +1,145 @@
+#include <stdlib.h>
+#include "matrix.h"
+#include "cnn.h"
+
+//================ FUNKCJE DO CNN ====================================
+
+int
+cnn_count_kernel(	unsigned input_x,	unsigned input_y,
+			unsigned krnl_x,	unsigned krnl_y,
+			unsigned *out_x,	unsigned *out_y,
+			unsigned stride)
+{
+	int x = 1, y = 1, aux = input_x - krnl_x;
+	double hlp;
+
+	if(aux < 0) return -1;
+	if(aux > 0)
+	{
+		hlp = aux/stride;
+		if(hlp == (double)(int)hlp) x += (int)hlp;
+		else return -1; 
+	}
+
+	aux = input_y - krnl_y;
+	if(aux < 0) return -1;
+	if(aux > 0)
+	{
+		hlp = aux/stride;
+		if(hlp == (double)(int)hlp) y += (int)hlp;
+		else return -1;
+	}
+
+	if(out_x != NULL) *out_x = x;
+	if(out_y != NULL) *out_y = y;
+
+	return x*y;
+}
+
+int
+cnn_crop_input(	const matrix_t* input, const matrix_t* kernel,
+			const matrix_t* output, unsigned stride)
+{
+	if(input == NULL || kernel == NULL || output == NULL) return 1;
+	if(output->x != matrix_size(kernel)) return 1;
+	if(stride < 1) return 1;
+
+	int krnl_count = cnn_count_kernel(	input->x, input->y, kernel->x,
+						kernel->y, NULL, NULL, stride);
+
+	if(output->y != (unsigned) krnl_count) return 1;
+	
+	int krnl_pos_x = 0, krnl_pos_y = 0, out_x = 0;
+	for(int i = 0; i  < krnl_count; ++i)
+	{
+		for(unsigned x = krnl_pos_x; x < (kernel->x + krnl_pos_x); ++x)
+			for(unsigned y = krnl_pos_y; y < (kernel->y + krnl_pos_y); ++y)
+				output->matrix[(out_x++) + output->x * i] =
+						input->matrix[x + input->x * y];
+		krnl_pos_x += stride;
+
+		if(krnl_pos_x + kernel->x > input->x)
+		{
+			krnl_pos_x = 0;
+			krnl_pos_y++;
+			out_x = 0;
+		}
+	}
+
+	return 0;
+}
+
+struct cnn_array*
+cnn_create(unsigned input_x, unsigned input_y)
+{
+	struct cnn_array* a = (struct cnn_array*)
+					calloc(1, sizeof(struct cnn_array*));
+	if(a != NULL)
+	{
+		a->head = NULL; a->head = NULL;
+		a->in_x = input_x; a->in_y = input_y;
+	}
+	return a;
+}
+
+int
+cnn_add_layer(struct cnn_array* cnn, unsigned krnl_x, unsigned krnl_y, unsigned
+		stride, void (*activation_func)(double*, unsigned))
+{
+	if(cnn == NULL || !stride) return 1;
+
+	struct cnn_layer* layer;
+	layer = (struct cnn_layer*)calloc(1, sizeof(struct cnn_layer*));	
+	if(layer == NULL) return 1;
+
+	layer->stride = stride;
+	layer->activation_func = activation_func;
+
+	unsigned out_x, out_y, krnl_count;
+
+	krnl_count = (cnn->head == NULL) ?
+		cnn_count_kernel(cnn->in_x,cnn->in_y,krnl_x,krnl_y,&out_x,&out_y, stride):
+		cnn_count_kernel(cnn->tail->output->x, cnn->tail->output->y,
+					krnl_x, krnl_y, &out_x, &out_y, stride);
+
+	if(krnl_count < 1) { free(layer); return 1;}
+
+	layer->output	= matrix_alloc(out_x, out_y);
+	layer->kernel	= matrix_alloc(krnl_x, krnl_y);
+	layer->delta	= matrix_alloc(out_x, out_y);
+	layer->weight_delta	= matrix_alloc(out_x, out_y);
+
+	if(	layer->output == NULL	|| layer->kernel == NULL || 
+		layer->delta == NULL	|| layer->weight_delta == NULL)
+	{
+		cnn_free_layer(layer);
+		return 1;
+	}
+
+	if(cnn->head == NULL)
+	{
+		cnn->head = layer;
+		layer->prev = NULL;
+	}
+	else
+	{
+		cnn->tail->next = layer;
+		layer->prev = cnn->tail;
+	}
+	layer->next = NULL;
+	cnn->tail = layer;
+	return 0;
+}
+
+void
+cnn_free_layer(struct cnn_layer* layer)
+{
+	if(layer != NULL)
+	{
+		if(layer->kernel != NULL) matrix_free(layer->kernel);
+		if(layer->output != NULL) matrix_free(layer->output);
+		if(layer->delta != NULL) matrix_free(layer->delta);
+		if(layer->weight_delta != NULL) matrix_free(layer->weight_delta);
+		free(layer);
+	}
+}
