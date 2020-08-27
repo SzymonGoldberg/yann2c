@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "matrix.h"
 #include "deep_network.h"
 #include "cnn.h"
@@ -37,21 +38,31 @@ cnn_count_kernel(	unsigned input_x,	unsigned input_y,
 	return x*y;
 }
 
-matrix_t* 
-cnn_crop_input(	const matrix_t* input, const matrix_t* kernel, unsigned stride)
+//THAT FUNC NOT WORKING NOW
+int 
+cnn_crop_input(	const matrix_t* input, const matrix_t* kernel, matrix_t* output,
+		unsigned stride, int alloc)
 {
-	if(input == NULL || kernel == NULL) return NULL;
-	//if(output->x != matrix_size(kernel)) return 1; //DEBUG
-	if(stride < 1) return NULL;
+	if(input == NULL || kernel == NULL) return 1;
+	if(stride < 1) return 1;
 
 	int krnl_count = cnn_count_kernel(	input->x, input->y, kernel->x,
 						kernel->y, NULL, NULL, stride);
-
-//	if(output->y != (unsigned) krnl_count) return 1; //DEBUG
-
-	matrix_t* output = matrix_alloc(matrix_size(kernel), krnl_count);
-	if(output == NULL) return NULL;
+	if(alloc)
+	{
+		output = matrix_alloc(matrix_size(kernel), krnl_count);
+		if(output == NULL) return 1;
+		printf("x = %u y = %u\n", output->x, output->y);	//EDBUG
+	}
+	else
+	{
+		if(output->y != (unsigned) krnl_count) return 1;
+		if(output->x != matrix_size(kernel)) return 1;
+	}
+	printf("krnl_count = %i\n", krnl_count);	//DEBUG
+	printf("krnl_size = %i\n", matrix_size(kernel));//DEBUG
 	
+
 	int krnl_pos_x = 0, krnl_pos_y = 0, out_x = 0;
 	for(int i = 0; i  < krnl_count; ++i)
 	{
@@ -68,8 +79,9 @@ cnn_crop_input(	const matrix_t* input, const matrix_t* kernel, unsigned stride)
 			out_x = 0;
 		}
 	}
+	matrix_display(*output);
 
-	return output;
+	return 0;
 }
 
 struct cnn_array*
@@ -155,20 +167,51 @@ cnn_add_fcl(struct cnn_array* cnn, unsigned output_size, void
 }
 
 //NOT DONE YET!!!
+/*
 int
 cnn_predict(struct cnn_array* cnn, const matrix_t* input)
 {
 	if(cnn == NULL || cnn->tail == NULL || cnn->head == NULL) return 1;
 	
 //alokacja pamieci na obrobiona macierz wejsciowa
+	int aux;
+	unsigned old_x, old_y, krnl_size;
 	struct cnn_layer* cnn_ptr = cnn->head;
 	do {
+		aux = (cnn_ptr == cnn->head) ?
+				//	input			kernel 		 out		  stride
+			cnn_crop_input(input,			cnn_ptr->kernel, cnn_ptr->crp_in, cnn_ptr->stride):
+			cnn_crop_input(cnn_ptr->prev->output,	cnn_ptr->kernel, cnn_ptr->crp_in, cnn_ptr->stride);
+		if(aux) return 1;
+		
+		old_x = cnn_ptr->kernel->x;
+		old_y = cnn_ptr->kernel->y;
+			
+		krnl_size = matrix_size(cnn_ptr->kernel);
+		matrix_resize(cnn_ptr->kernel, krnl_size, 1);
+
+		aux = matrix_multiply(*cnn_ptr->crp_in, *cnn_ptr->kernel, cnn_ptr->output, 0, 1);
+		if(aux) return 1;
+
+		matrix_resize(cnn_ptr->kernel, old_x, old_y);
 
 		cnn_ptr = cnn_ptr->next;
 	} while(cnn_ptr != NULL);
+
+	if(cnn->fcl != NULL)
+	{
+		old_x = cnn->tail->output->x;
+		old_y = cnn->tail->output->y;
+
+		matrix_resize(cnn->tail->output, matrix_size(cnn->tail->output), 1);
+		nn_predict(cnn->fcl, cnn->tail->output, 0);
+
+		cnn->tail->output->x = old_x;
+		cnn->tail->output->y = old_y;
+	}
 	return 0;
 }
-
+*/
 void
 cnn_free_layer(struct cnn_layer* layer)
 {
