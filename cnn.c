@@ -40,35 +40,31 @@ cnn_count_kernel(	unsigned input_x,	unsigned input_y,
 
 //THAT FUNC NOT WORKING NOW
 int 
-cnn_crop_input(	const matrix_t* input, const matrix_t* kernel, matrix_t* output,
-		unsigned stride, int alloc)
+cnn_crop_input(	const matrix_t* input, const matrix_t* kernel, matrix_t** output,
+		unsigned stride)
 {
 	if(input == NULL || kernel == NULL) return 1;
 	if(stride < 1) return 1;
 
 	int krnl_count = cnn_count_kernel(	input->x, input->y, kernel->x,
 						kernel->y, NULL, NULL, stride);
-	if(alloc)
+	if(*output == NULL)
 	{
-		output = matrix_alloc(matrix_size(kernel), krnl_count);
-		if(output == NULL) return 1;
-		printf("x = %u y = %u\n", output->x, output->y);	//EDBUG
+		*output = matrix_alloc(matrix_size(kernel), krnl_count);
+		if(*output == NULL) return 1;
 	}
 	else
 	{
-		if(output->y != (unsigned) krnl_count) return 1;
-		if(output->x != matrix_size(kernel)) return 1;
+		if((*output)->y != (unsigned) krnl_count) return 1;
+		if((*output)->x != matrix_size(kernel)) return 1;
 	}
-	printf("krnl_count = %i\n", krnl_count);	//DEBUG
-	printf("krnl_size = %i\n", matrix_size(kernel));//DEBUG
-	
 
 	int krnl_pos_x = 0, krnl_pos_y = 0, out_x = 0;
 	for(int i = 0; i  < krnl_count; ++i)
 	{
 		for(unsigned x = krnl_pos_x; x < (kernel->x + krnl_pos_x); ++x)
 			for(unsigned y = krnl_pos_y; y < (kernel->y + krnl_pos_y); ++y)
-				output->matrix[(out_x++) + output->x * i] =
+				(*output)->matrix[(out_x++) + (*output)->x * i] =
 						input->matrix[x + input->x * y];
 		krnl_pos_x += stride;
 
@@ -79,7 +75,6 @@ cnn_crop_input(	const matrix_t* input, const matrix_t* kernel, matrix_t* output,
 			out_x = 0;
 		}
 	}
-	matrix_display(*output);
 
 	return 0;
 }
@@ -123,6 +118,7 @@ cnn_add_layer(struct cnn_array* cnn, unsigned krnl_x, unsigned krnl_y, unsigned
 	layer->kernel	= matrix_alloc(krnl_x, krnl_y);
 	layer->delta	= matrix_alloc(out_x, out_y);
 	layer->weight_delta	= matrix_alloc(out_x, out_y);
+	layer->crp_in = NULL;
 
 	if(	layer->output == NULL	|| layer->kernel == NULL || 
 		layer->delta == NULL	|| layer->weight_delta == NULL)

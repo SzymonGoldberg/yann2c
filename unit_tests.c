@@ -948,8 +948,8 @@ int main (void)
 				-0.1, 0.1, 0.9,
 				0.1, 0.4, 0.1);
 
-	c = matrix_alloc(9, 2);
-	aux = cnn_crop_input(a, b, c, 1, 0);
+	c = NULL;
+	aux = cnn_crop_input(a, b, &c, 1);
 
 	if(aux)		printf("Powinna zwrocic 0 a zwrocila %i\n", aux);
 	else		puts("=== OK! ===");
@@ -957,17 +957,14 @@ int main (void)
 	double exp_out0[] = {	8.5, 9.5, 9.9, 0.65, 0.8, 0.8, 1.2, 1.3, 0.5,
 				9.5, 9.9, 9.0, 0.8, 0.8, 0.9, 1.3, 0.5, 1.0};
 
-	puts("");
-	matrix_display(*c);
-
  	for(int i = 0; i < 18; ++i)
 	{
 		if(c->matrix[i] > exp_out0[i] + 0.001 ||
 	       	   c->matrix[i] < exp_out0[i] - 0.001)
 		{
-//                	printf("-Funkcja zle wypelnila %i komorke macierzy\n", i);
-//			printf("--powinno byc %lf a jest %lf\n",
-//			exp_out0[i], c->matrix[i]);
+                	printf("-Funkcja zle wypelnila %i komorke macierzy\n", i);
+			printf("--powinno byc %lf a jest %lf\n",
+			exp_out0[i], c->matrix[i]);
 			++err;
 		}
 	}
@@ -981,4 +978,3 @@ int main (void)
 	matrix_free(b);
 	matrix_free(c);
 }
-

@@ -49,6 +49,7 @@ matrix_free(matrix_t *a)
 	if(a == NULL) return;
 	if((*a).matrix != NULL) free((*a).matrix );
 	free(a);
+	a = NULL;
 }
 
 

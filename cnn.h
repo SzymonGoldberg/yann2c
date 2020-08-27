@@ -35,8 +35,8 @@ cnn_count_kernel(	unsigned input_x,	unsigned input_y,
 			unsigned stride);
 
 int 
-cnn_crop_input(	const matrix_t* input, const matrix_t* kernel, matrix_t* out,
-		unsigned stride, int alloc);
+cnn_crop_input(	const matrix_t* input, const matrix_t* kernel, matrix_t** out,
+		unsigned stride);
 
 
 int cnn_add_layer(struct cnn_array* cnn, unsigned krnl_x, unsigned krnl_y,
