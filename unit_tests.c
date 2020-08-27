@@ -947,10 +947,9 @@ int main (void)
 	matrix_fill(b, 9,	0.1, 0.2, -0.1,
 				-0.1, 0.1, 0.9,
 				0.1, 0.4, 0.1);
-	c = matrix_alloc(9, 2);
-	aux = cnn_crop_input(a, b, c, 1);
+	c = cnn_crop_input(a, b, 1);
 
-	if(aux)		printf("Powinna zwrocic 0 a zwrocila %i\n", aux);
+	if(c == NULL)	puts("Powinna zwrocic adreus a zwrocila NULL");
 	else		puts("=== OK! ===");
 
 	double exp_out0[] = {	8.5, 9.5, 9.9, 0.65, 0.8, 0.8, 1.2, 1.3, 0.5,

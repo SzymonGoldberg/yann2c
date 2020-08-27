@@ -6,6 +6,7 @@
 struct cnn_layer {
 	matrix_t *kernel;
 	matrix_t *output;
+	matrix_t *crp_in;	//cropped input
 
 	matrix_t *delta;
 	matrix_t *weight_delta;
@@ -33,9 +34,8 @@ cnn_count_kernel(	unsigned input_x,	unsigned input_y,
 			unsigned *out_x,	unsigned *out_y,
 			unsigned stride);
 
-int
-cnn_crop_input(	const matrix_t* input, const matrix_t* kernel,
-			const matrix_t* output, unsigned stride);
+matrix_t* 
+cnn_crop_input(	const matrix_t* input, const matrix_t* kernel, unsigned stride);
 
 struct cnn_array*
 cnn_create(unsigned input_x, unsigned input_y);
