@@ -38,9 +38,18 @@ cnn_count_kernel(	unsigned input_x,	unsigned input_y,
 	return x*y;
 }
 
-//THAT FUNC NOT WORKING NOW
+matrix_t*
+cnn_crop_alloc(const matrix_t* input, const matrix_t* kernel, unsigned stride)
+{
+	int krnl_count = cnn_count_kernel(	input->x, input->y, kernel->x,
+						kernel->y, NULL, NULL, stride);
+
+	matrix_t* output = matrix_alloc(matrix_size(kernel), krnl_count);
+	return output;
+}
+
 int 
-cnn_crop_input(	const matrix_t* input, const matrix_t* kernel, matrix_t** output,
+cnn_crop_input(	const matrix_t* input, const matrix_t* kernel, matrix_t* output,
 		unsigned stride)
 {
 	if(input == NULL || kernel == NULL) return 1;
@@ -48,23 +57,16 @@ cnn_crop_input(	const matrix_t* input, const matrix_t* kernel, matrix_t** output
 
 	int krnl_count = cnn_count_kernel(	input->x, input->y, kernel->x,
 						kernel->y, NULL, NULL, stride);
-	if(*output == NULL)
-	{
-		*output = matrix_alloc(matrix_size(kernel), krnl_count);
-		if(*output == NULL) return 1;
-	}
-	else
-	{
-		if((*output)->y != (unsigned) krnl_count) return 1;
-		if((*output)->x != matrix_size(kernel)) return 1;
-	}
+
+	if(output->y != (unsigned) krnl_count) return 1;
+	if(output->x != matrix_size(kernel)) return 1;
 
 	int krnl_pos_x = 0, krnl_pos_y = 0, out_x = 0;
 	for(int i = 0; i  < krnl_count; ++i)
 	{
 		for(unsigned x = krnl_pos_x; x < (kernel->x + krnl_pos_x); ++x)
 			for(unsigned y = krnl_pos_y; y < (kernel->y + krnl_pos_y); ++y)
-				(*output)->matrix[(out_x++) + (*output)->x * i] =
+				output->matrix[(out_x++) + output->x * i] =
 						input->matrix[x + input->x * y];
 		krnl_pos_x += stride;
 
@@ -72,10 +74,9 @@ cnn_crop_input(	const matrix_t* input, const matrix_t* kernel, matrix_t** output
 		{
 			krnl_pos_x = 0;
 			krnl_pos_y++;
-			out_x = 0;
 		}
+		out_x = 0;
 	}
-
 	return 0;
 }
 
@@ -83,7 +84,7 @@ struct cnn_array*
 cnn_create(unsigned input_x, unsigned input_y)
 {
 	struct cnn_array* a = (struct cnn_array*)
-					calloc(1, sizeof(struct cnn_array*));
+					calloc(1, sizeof(struct cnn_array));
 	if(a != NULL)
 	{
 		a->head = NULL; a->head = NULL;
@@ -99,7 +100,7 @@ cnn_add_layer(struct cnn_array* cnn, unsigned krnl_x, unsigned krnl_y, unsigned
 	if(cnn == NULL || !stride) return 1;
 
 	struct cnn_layer* layer;
-	layer = (struct cnn_layer*)calloc(1, sizeof(struct cnn_layer*));	
+	layer = (struct cnn_layer*)calloc(1, sizeof(struct cnn_layer));	
 	if(layer == NULL) return 1;
 
 	layer->stride = stride;
@@ -162,8 +163,29 @@ cnn_add_fcl(struct cnn_array* cnn, unsigned output_size, void
 	return 0;
 }
 
-//NOT DONE YET!!!
-/*
+int
+cnn_multiply(matrix_t* in, matrix_t* krnl, matrix_t* out)
+{
+	unsigned old_krnl_x, old_krnl_y, old_out_x, old_out_y;
+	unsigned krnl_size, out_size;
+
+	old_krnl_x	= krnl->x;	old_krnl_y	= krnl->y;
+	old_out_x	= out->x;	old_out_y	= out->y;
+
+	krnl_size = matrix_size(krnl);
+	out_size = matrix_size(out);
+
+	matrix_resize(krnl, 1, krnl_size);
+	matrix_resize(out, 1, out_size);
+
+	int aux = matrix_multiply(*in, *krnl, out, 0, 0);
+
+	matrix_resize(krnl, old_krnl_x, old_krnl_y);
+	matrix_resize(out, old_out_x, old_out_y);
+
+	return aux;
+}
+
 int
 cnn_predict(struct cnn_array* cnn, const matrix_t* input)
 {
@@ -171,43 +193,66 @@ cnn_predict(struct cnn_array* cnn, const matrix_t* input)
 	
 //alokacja pamieci na obrobiona macierz wejsciowa
 	int aux;
-	unsigned old_x, old_y, krnl_size;
 	struct cnn_layer* cnn_ptr = cnn->head;
 	do {
+		if(cnn_ptr->crp_in == NULL)
+			cnn_ptr->crp_in = (cnn_ptr == cnn->head) ?
+				//	input				kernel 		 stride
+				cnn_crop_alloc(input,			cnn_ptr->kernel, cnn_ptr->stride):
+				cnn_crop_alloc(cnn_ptr->prev->output,	cnn_ptr->kernel, cnn_ptr->stride);
+
 		aux = (cnn_ptr == cnn->head) ?
 				//	input			kernel 		 out		  stride
 			cnn_crop_input(input,			cnn_ptr->kernel, cnn_ptr->crp_in, cnn_ptr->stride):
 			cnn_crop_input(cnn_ptr->prev->output,	cnn_ptr->kernel, cnn_ptr->crp_in, cnn_ptr->stride);
 		if(aux) return 1;
-		
-		old_x = cnn_ptr->kernel->x;
-		old_y = cnn_ptr->kernel->y;
-			
-		krnl_size = matrix_size(cnn_ptr->kernel);
-		matrix_resize(cnn_ptr->kernel, krnl_size, 1);
 
-		aux = matrix_multiply(*cnn_ptr->crp_in, *cnn_ptr->kernel, cnn_ptr->output, 0, 1);
+		aux = cnn_multiply(cnn_ptr->crp_in, cnn_ptr->kernel, cnn_ptr->output);
 		if(aux) return 1;
-
-		matrix_resize(cnn_ptr->kernel, old_x, old_y);
 
 		cnn_ptr = cnn_ptr->next;
 	} while(cnn_ptr != NULL);
 
 	if(cnn->fcl != NULL)
 	{
+		unsigned old_x, old_y;
 		old_x = cnn->tail->output->x;
 		old_y = cnn->tail->output->y;
 
 		matrix_resize(cnn->tail->output, matrix_size(cnn->tail->output), 1);
 		nn_predict(cnn->fcl, cnn->tail->output, 0);
 
-		cnn->tail->output->x = old_x;
-		cnn->tail->output->y = old_y;
+		matrix_resize(cnn->tail->output, old_x, old_y);
 	}
 	return 0;
 }
-*/
+
+//NOT DONE YET!!!
+int
+cnn_backpropagation(struct cnn_array* cnn, const matrix_t* input, const
+		matrix_t* exp_out, double alpha)
+{
+	if(cnn == NULL || input == NULL || exp_out == NULL) return 1;
+	if(cnn_predict(cnn, input)) return 1;
+
+	if(cnn->fcl != NULL)
+	{
+		unsigned old_x, old_y;
+		old_x = cnn->tail->output->x;
+		old_y = cnn->tail->output->y;
+
+		matrix_resize(cnn->tail->output, matrix_size(cnn->tail->output), 1);
+
+		if(nn_backpropagation(cnn->fcl, cnn->tail->output, exp_out,
+					alpha, 0.0, 0)) return 1;
+
+		matrix_resize(cnn->tail->output, old_x, old_y);
+	}
+
+	return 0;
+}
+
+
 void
 cnn_free_layer(struct cnn_layer* layer)
 {

@@ -948,8 +948,8 @@ int main (void)
 				-0.1, 0.1, 0.9,
 				0.1, 0.4, 0.1);
 
-	c = NULL;
-	aux = cnn_crop_input(a, b, &c, 1);
+	c = cnn_crop_alloc(a, b, 1);
+	aux = cnn_crop_input(a, b, c, 1);
 
 	if(aux)		printf("Powinna zwrocic 0 a zwrocila %i\n", aux);
 	else		puts("=== OK! ===");
@@ -977,4 +977,22 @@ int main (void)
 	matrix_free(a);
 	matrix_free(b);
 	matrix_free(c);
+
+	puts("TEST 35");
+
+	struct cnn_array *cnn = cnn_create(3, 3);
+
+	cnn_add_layer(cnn, 2, 2, 1, NULL);
+
+	matrix_fill(cnn->tail->kernel, 4, 1.0, 2.0, 2.0, 1.0);
+
+	a = matrix_alloc(3, 3);
+	matrix_fill(a, 9, 1.0, 2.0, 3.0, 6.0, 5.0, 3.0, 1.0, 4.0, 1.0);
+
+	aux = cnn_predict(cnn, a);
+	printf("aux = %i\n", aux);
+
+	matrix_display(*cnn->tail->output);
+
+	return 0;
 }
