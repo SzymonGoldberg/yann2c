@@ -249,6 +249,39 @@ cnn_backpropagation(struct cnn_array* cnn, const matrix_t* input, const
 		matrix_resize(cnn->tail->output, old_x, old_y);
 	}
 
+	struct cnn_layer* ptr = cnn->tail;
+
+	//alokacja pamieci na delty
+	do {
+		if(ptr->delta != NULL) {
+			ptr->delta = matrix_alloc(matrix_size(ptr->kernel), 1);
+			if(ptr->delta == NULL) return 1;
+		}
+		ptr = ptr->prev;
+	} while(ptr != NULL);
+
+	ptr = cnn->tail;
+	//obliczanie delty
+	int aux;
+	do {
+		if(ptr = cnn->tail)
+			aux = (cnn->fcl != NULL) ?
+			//delta = next_delta * next_weights 
+				matrix_multiply(*cnn->fcl->head->delta,
+						*cnn->fcl->head->weights,
+						cnn->tail->delta, 0, 0):
+			//delta = output - expected output
+				matrix_substraction(*cnn->tail->output,
+						*exp_out, cnn->tail->delta);
+		else
+		//delta = next_delta * next_weights 
+			aux = matrix_multiply(	*ptr->next->delta,
+						*ptr->next->kernel,
+						ptr->delta, 0, 0);
+	if(aux) return 1;
+
+	} while(ptr != NULL);
+
 	return 0;
 }
 
