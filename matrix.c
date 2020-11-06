@@ -212,7 +212,7 @@ matrix_compare_max_value_index(const matrix_t* a, const matrix_t* b)
 }
 
 unsigned
-matrix_size(const matrix_t* a) { return (a == NULL) ? (-1) : ((a->x) * (a->y)); }
+matrix_size(const matrix_t* a) { return (a == NULL) ? (0) : ((a->x) * (a->y)); }
 
 int
 matrix_resize(matrix_t* a, unsigned new_x, unsigned new_y)
@@ -326,6 +326,65 @@ matrix_array_free(struct matrix_array *array)
 	
 	free(array);
 }
+
+
+
+//=============== DO CNN ==========================
+
+
+//NOT WORKING YET
+void
+matrix_multiply_indx(const matrix_t a, const matrix_t b,
+					const idx_matrix_t *idx_m, matrix_t *result,
+					char transposed_a, char transposed_b, char id)
+{
+
+	double value = 0, a_value = 0, b_value = 0;
+	unsigned aux = transposed_a ? idx_m->y : idx_m->x;
+	int index;
+
+	if(id == 1) {
+		for(unsigned y = 0; y < (*result).y; ++y) {
+			for(unsigned x = 0; x < (*result).x; ++x) {
+				for(unsigned g = 0; g < aux; ++g) {	
+					index = transposed_b ? idx_m->m[g + x*idx_m->x]
+										:idx_m->m[x + g*idx_m->x];
+
+					b_value = (index < 0) ? (0): b.matrix[index];
+
+					a_value = transposed_a ? a.matrix[y + g*a.x]
+								:a.matrix[g + y*a.x];
+					
+					value += a_value * b_value;
+				}
+				(*result).matrix[x + y * (*result).x] = value;
+				value = 0;
+			}
+		}
+	}
+	if(id == 0){
+		for(unsigned y = 0; y < (*result).y; ++y){
+			for(unsigned x = 0; x < (*result).x; ++x){
+				for(unsigned g = 0; g < aux; ++g)
+				{
+					b_value = transposed_b ? b.matrix[g + x*b.x]
+								:b.matrix[x + g*b.x];
+								
+					index = transposed_a ?idx_m->m[y + g*idx_m->x]
+								:idx_m->m[g + y*idx_m->x];
+				
+					a_value = (index < 0) ? (0) : a.matrix[index];
+					
+					value += a_value * b_value;
+				}
+				(*result).matrix[x + y * (*result).x] = value;
+				value = 0;
+			}
+		}
+	}	
+}
+
+
 
 //======= GLOWNIE DO DEBUGU - USUNAC W KONCOWEJ WERSJI =======
 

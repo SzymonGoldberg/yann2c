@@ -13,6 +13,13 @@ typedef struct
 	unsigned int y; //liczba wersow
 } matrix_t;
 
+//matrix build with integrers used as mask in matrix_multiplication
+typedef struct {
+	int *m;		//array of integrers with (x * y) size
+	unsigned x;	//number of cols
+	unsigned y;	//number of rows
+} idx_matrix_t;
+
 //dwustronna lista macierzy
 struct matrix_node {
  	matrix_t *matrix;
@@ -94,5 +101,20 @@ void matrix_array_free(struct matrix_array *array);
 struct matrix_array * matrix_array_create(void);
 
 void matrix_array_display(const struct matrix_array* array);
+
+//function multiply two matrixs, but on of them <id = 0 -first, id = 1 - second>
+//is covered by special mask <idx_m> filled with number of indexes with valuable data from covered matrix
+//This function is created and used only internal, in other funcs, so it's do not have any data validation mechanism
+//and its returns void.
+void
+matrix_multiply_indx(	const matrix_t a,			//first matrix
+						const matrix_t b,			//second matrix
+						const idx_matrix_t *idx_m,	//index mask matrix
+						matrix_t *result,			//result matrix (not allocated or validated)
+						char transposed_a,			//flag for transposing a matrix
+						char transposed_b,			//flag for transposing b matrix 
+						char id);					//flag to indicate which matrix is masked by idx_m
+
+
 
 #endif

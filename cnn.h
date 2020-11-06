@@ -3,51 +3,37 @@
 
 //====== CNN ======
 
-struct cnn_layer {
-	matrix_t *kernel;
-	matrix_t *output;
-	matrix_t *crp_in;	//cropped input
-
-	matrix_t *delta;
-	matrix_t *weight_delta;
-
-	void (*activation_func)(double *, unsigned);	//funkcja aktywacji
-	unsigned stride;
-
-	struct cnn_layer *next;
-	struct cnn_layer *prev;
-};
-
-struct cnn_array {
-	struct cnn_layer *head;
-	struct cnn_layer *tail;
-	struct nn_array *fcl; //fully connected layers
-
-	unsigned in_x, in_y;
-};
+//sources:
+//--->https://arxiv.org/pdf/1603.07285.pdf
+//--->https://www.machinecurve.com/index.php/2019/09/29/understanding-transposed-convolutions/
 
 //---====== DEKLARACJE FUNKCJI DO CNN =====---
 
+//count kernels function
+//how it work: it calculate how many kernels <krnl> we get by moving them over
+//matrix which size is x = <in_x>, y = <in_y>.
+//Example formula: kernel width counter = (kernel width - input width)/stride + 1
+//Return value
+//amount of all kernels possible positions. In case of non valid data -1.
+
 int
-cnn_count_kernel(	unsigned input_x,	unsigned input_y,
-			unsigned krnl_x,	unsigned krnl_y,
-			unsigned *out_x,	unsigned *out_y,
-			unsigned stride);
+cnn_count_krnl( unsigned in_x, 			//input width
+				unsigned in_y, 			//input height
+				const matrix_t* krnl, 	//kernel matrix
+				unsigned *out_x,		//returns kernel diffrent positions in width
+				unsigned *out_y,		//returns kernel diffrent positions in height
+				unsigned stride);		//stride
+
+//convolution mask creator
+//how it work: it takes index matrix <output> (which is pre-allocated and non validated)
+//and fill any row with indexes of kernels in different positions.
+//Return value
+//0 - success 1 - something go wrong
 
 int 
-cnn_crop_input(	const matrix_t* input, const matrix_t* kernel, matrix_t* out,
-		unsigned stride);
-
-
-int cnn_add_layer(struct cnn_array* cnn, unsigned krnl_x, unsigned krnl_y,
-		unsigned stride, void (*activation_func)(double*, unsigned));
-
-struct cnn_array* cnn_create(unsigned input_x, unsigned input_y);
-void cnn_free_layer(struct cnn_layer* layer);
-void cnn_free(struct cnn_array* cnn);
-int cnn_predict(struct cnn_array* cnn, const matrix_t* input);
-
-matrix_t*
-cnn_crop_alloc(const matrix_t* input, const matrix_t* kernel, unsigned stride);
-
+cnn_conv_create(unsigned in_x,			//input width
+				unsigned in_y,			//input height
+				const matrix_t* kernel,	//kernel matrix
+				idx_matrix_t* output,	//index matrix filled with kernel indexes in valid positions
+				unsigned stride);		//stride
 #endif
